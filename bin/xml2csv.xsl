@@ -3,12 +3,11 @@
   <!--
        Derived from the sample "Converting XML to CSV using XSLT 1.0" at
        http://fahdshariff.blogspot.com.au/2014/07/converting-xml-to-csv-using-xslt-10.html
-       by Fahd Shariff under GNU GENERAL PUBLIC LICENSE Version 3. See
-       the accompanying gpl-3.0.txt file (or http://www.gnu.org/licenses/gpl-3.0.html
+       by Fahd Shariff under GNU GENERAL PUBLIC LICENSE Version 3.
 
        Copyright (c) 2015, Flinders University, South Australia. All rights reserved.
        Contributors: Library, Information Services, Flinders University.
-       See the accompanying LICENSE file (or http://www.gnu.org/licenses/gpl-3.0.html).
+       See the accompanying gpl-3.0.txt file (or http://www.gnu.org/licenses/gpl-3.0.html).
 
        PURPOSE
        This XSLT transforms *modified* Australasian Digital Theses (ADT)

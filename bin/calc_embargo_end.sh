@@ -1,11 +1,12 @@
 #!/bin/sh
 #
-# Create a CSV file with embargo end-dates calculated from ADT start date
-# and number of months embargoed (specified in the html a-element).
-#
 # Copyright (c) 2015, Flinders University, South Australia. All rights reserved.
 # Contributors: eResearch@Flinders, Library, Information Services, Flinders University.
 # See the accompanying LICENSE file (or http://opensource.org/licenses/BSD-3-Clause).
+#
+# Create CSV data with embargo end-dates calculated from ADT start date
+# and number of months embargoed (specified in the html a-element). Send
+# the result to stdout.
 ##############################################################################
 
 

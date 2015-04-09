@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # Copyright (c) 2015, Flinders University, South Australia. All rights reserved.
-# Contributors: eResearch@Flinders, Library, Information Services, Flinders University.
+# Contributors: Library, Information Services, Flinders University.
 # See the accompanying LICENSE file (or http://opensource.org/licenses/BSD-3-Clause).
 #
 # Extract metadata and attachments from an Australian Digital Thesis (ADT) 

@@ -5,7 +5,7 @@
 # See the accompanying LICENSE file (or http://opensource.org/licenses/BSD-3-Clause).
 #
 # ALGORITHM
-# - Extract metadata from approved Australian Digital Thesis (ADT) HTML page.
+# - Extract metadata from approved Australasian Digital Theses (ADT) HTML page.
 #   An example of a approved page within the filesystem is:
 #   /opt/adt/html/uploads/approved/adt-SFU20050603.095257/adt-ADT20050603.095257.html
 # - Convert result to XML (so we don't rely on HTML-element order and can

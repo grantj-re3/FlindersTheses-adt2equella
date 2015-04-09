@@ -5,8 +5,8 @@
 # See the accompanying LICENSE file (or http://opensource.org/licenses/BSD-3-Clause).
 #
 # ALGORITHM
-# - Extract (attachment) filenames from the public index.html page
-#   specified on the command line. Eg.
+# - Extract (attachment) filenames from the public Australasian Digital
+#   Theses (ADT) index.html page specified on the command line. Eg.
 #   /opt/adt/html/public/adt-SFU20050603.095257/index.html
 # - Copy the files to a subdirectory where they will be referenced
 #   in the Equella EBI-CSV file.

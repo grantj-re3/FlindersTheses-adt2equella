@@ -4,13 +4,13 @@
 # Contributors: Library, Information Services, Flinders University.
 # See the accompanying LICENSE file (or http://opensource.org/licenses/BSD-3-Clause).
 #
-# Extract metadata and attachments from an Australian Digital Thesis (ADT) 
+# Extract metadata and attachments from an Australasian Digital Theses (ADT) 
 # system. The files to be processed will either be approved or delayed
 # (ie. embargoed ) HTML files.
 #
 # ALGORITHM
 # - Iterate through all ADT approved (or embargoed) html files:
-#   * Extract metadata from approved Australian Digital Thesis (ADT) HTML page.
+#   * Extract metadata from approved ADT HTML page.
 #     An example of a approved page within the filesystem is:
 #     /opt/adt/html/uploads/approved/adt-SFU20050603.095257/adt-ADT20050603.095257.html
 #   * For each thesis, invoke the script to extract metadata into an XML file

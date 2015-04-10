@@ -58,8 +58,11 @@
     <field csv_header_name="item/rhd/statement/text">DC.Rights</field>
     <field csv_header_name="item/rhd/previous_identifier_url">DC.Identifier</field>
 
+    <!-- Use X.thesis_type which is derived from X.dtype & X.degree
     <field csv_header_name="item/rhd/dtype">X.dtype</field>
     <field csv_header_name="item/rhd/degree">X.degree</field>
+    -->
+    <field csv_header_name="item/rhd/thesis_type">X.thesis_type</field>
     <field csv_header_name="item/rhd/publisher">X.institution</field>
     <field csv_header_name="item/rhd/deptdegree">X.dept</field>
     <field csv_header_name="item/rhd/school">X.school</field>

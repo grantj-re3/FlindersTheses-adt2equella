@@ -165,6 +165,44 @@ cat $fname |
     s:| />:" />:g
   ' |
 
+  awk -F\" '
+    # Insert X.thesis_type before the closing </BODY> tag.
+    # X.thesis_type is derived from X.dtype (or X.degree if X.dtype is inconclusive)
+    BEGIN {
+      dtype=""
+      degree=""
+    }
+
+    $2=="X.dtype" {dtype=$4}
+    $2=="X.degree" {degree=$4}
+    !/<\/BODY>/ {print $0}
+
+    /<\/BODY>/ {
+      # Default type - hopefully no instances of this!
+      type = "FIXME::" dtype "::" degree "::"
+
+      if(tolower(dtype) ~ /^phd /)
+        type = "Doctor of Philosophy"
+
+      else if(tolower(dtype) ~ /^masters /)
+        type = "Masters by Research"
+
+      else if(tolower(dtype) ~ /professional *doctorate/)
+        type = "Professional Doctorate"
+
+      else if(dtype=="") {
+        if(tolower(degree) ~ /[^a-z]phd[^a-z]/)
+          type = "Doctor of Philosophy"
+
+        else if(tolower(degree) ~ /[^a-z]masters[^a-z]/)
+          type = "Masters by Research"
+      }
+
+      printf "  <META NAME=\"X.thesis_type\" CONTENT=\"%s\" />\n", type
+      print $0
+    }
+  ' |
+
   iconv -f WINDOWS-1250 -t UTF8 -	# Convert char encoding to UTF-8
 
 exit 0

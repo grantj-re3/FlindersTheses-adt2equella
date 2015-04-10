@@ -33,8 +33,9 @@ EXTRACT_METADATA_SCRIPT="$APP_DIR/extract_adt_metadata.sh"
 EXTRACT_ATTACHMENTS_SCRIPT="$APP_DIR/extract_adt_attachments.sh"
 XSLT_PATH="$APP_DIR/xml2csv.xsl"
 
-OUT_DIR_APPROVED="$APP_DIR/xmlout"
-OUT_DIR_EMBARGO="$APP_DIR/xmlout_embargo"
+OUT_DIR_PARENT=`cd "$APP_DIR/.." ; pwd`	# Absolute dir containing out dir parent
+OUT_DIR_APPROVED="$OUT_DIR_PARENT/results/ebi_approved"
+OUT_DIR_EMBARGO="$OUT_DIR_PARENT/results/ebi_embargo"
 OUT_CSV_BASENAME=theses_ebi.csv
 
 ADT_PARENT_DIR_COMMON=/opt/adt/html

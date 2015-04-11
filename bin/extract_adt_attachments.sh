@@ -64,13 +64,28 @@ for attachment in $attachments; do
     # Attachment file exists
 
     if [ ! -z "$dname" ]; then
-      # Relative path to dest file
-      dest_attachment="`basename $dname`/`basename $attachment`"
-      echo "  <META NAME=\"I.attachment\" CONTENT=\"$dest_attachment\" />"
+      # Replace destination "FILENAME.pdf.pdf" with "FILENAME.pdf"
+      attachment_dest=`basename "$attachment"`
+      if echo "$attachment_dest" |egrep -q "\.pdf\.pdf$"; then
+        attachment_dest=`echo "$attachment_dest" |sed 's/\.pdf\.pdf$/.pdf/'`
+      fi
 
-      #echo "Copying $attachment to dir $dname" >&2
-      ###[ ! -d "$dname" ] && mkdir -p "$dname"
-      ###cp -fp "$attachment" "$dname"
+      # Make other destination filenames more meaningful
+      if echo "$attachment_dest" |egrep -q "^01front\.pdf$"; then
+        attachment_dest="thesis-01abstract.pdf"
+      else
+        attachment_dest="thesis-$attachment_dest"
+      fi
+
+      # Path to dest file relative to XML/CSV files
+      attachment_dest_rel="`basename $dname`/$attachment_dest"
+      echo "  <META NAME=\"I.attachment\" CONTENT=\"$attachment_dest_rel\" />"
+
+      echo "Copying $attachment to dir $attachment_dest_rel" >&2
+      [ ! -d "$dname" ] && mkdir -p "$dname"
+      cmd="cp -fp \"$attachment\" \"$dname/$attachment_dest\""
+      #echo "CMD: $cmd" >&2
+      eval $cmd
     fi
 
   else

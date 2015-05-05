@@ -17,8 +17,8 @@
   <xsl:output method="xml" version="1.0" indent="yes" />
   <xsl:strip-space elements="*" />
 
-  <!-- "true() = Adds debug metadata to the output; false() = Normal output" -->
-  <xsl:variable name="debug" select="false()"/>
+  <!-- 0 = No debug; 1 = Debug info; 2 = More debug info -->
+  <xsl:variable name="debug_level" select="0"/>
 
   <xsl:variable name="today" select="substring(date:date-time(),1,10)"/>
   <xsl:variable name="identifier_prefix" select="'flex-'"/>
@@ -27,7 +27,7 @@
   />
 
   <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
-  <!-- FUNCTIONS (VIRTUAL) -->
+  <!-- TEMPLATE-BASED FUNCTIONS - can only return text or element-sequences -->
   <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
 
   <!-- Recursive function to split a delimiter-separated string into multiple elements.
@@ -72,6 +72,27 @@
   </xsl:template>
 
   <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
+  <!-- Return string 'true' if iso_date param has format YYYY-MM-DD; else return 'false' -->
+  <xsl:template name="is_iso_date">
+    <xsl:param name="iso_date"/>
+    <xsl:param name="year_min" select="'1900'"/>
+    <xsl:param name="year_max" select="'2099'"/>
+
+    <xsl:value-of select="boolean(
+      string-length($iso_date) = 10 and
+      translate($iso_date, '0123456789', '') = '--' and
+      number(substring($iso_date, 1, 4)) &gt;= $year_min and
+      number(substring($iso_date, 1, 4)) &lt;= $year_max and
+      number(substring($iso_date, 5, 1)) = '-' and
+      number(substring($iso_date, 6, 2)) &gt;=  1 and
+      number(substring($iso_date, 6, 2)) &lt;= 12 and
+      number(substring($iso_date, 8, 1)) = '-' and
+      number(substring($iso_date, 9, 2)) &gt;=  1 and
+      number(substring($iso_date, 9, 2)) &lt;= 31
+    )"/>
+  </xsl:template>
+
+  <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
   <!-- TEMPLATES -->
   <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
 
@@ -103,39 +124,52 @@
       Make OAI-PMH metadata available if:
         /xml/item/@itemstatus = 'live' and
         (/xml/item/curriculum/thesis/release/status = 'Open Access' or 'Restricted Access') and
-        /xml/item/curriculum/thesis/release/release_date exists and
+        /xml/item/curriculum/thesis/release/release_date has format YYYY-MM-DD and
         /xml/item/curriculum/thesis/release/release_date <= today
 
       We need very strict control of release_date format!
     -->
     <xsl:variable name="is_live" select="boolean(/xml/item/@itemstatus = 'live')" />
     <xsl:variable name="will_be_open_access" select="boolean(status = 'Open Access' or status = 'Restricted Access')" />
-    <xsl:variable name="release_date_exists" select="boolean(release_date != '')" />
     <xsl:variable name="is_released" select="boolean(translate(release_date, '-', '') &lt;=  translate($today, '-', ''))" />
+    <xsl:variable name="s_is_valid_release_date">
+      <xsl:call-template name="is_iso_date">
+        <xsl:with-param name="iso_date" select="release_date"/>
+      </xsl:call-template>
+    </xsl:variable>
 
-    <xsl:if test="$debug">
-      <dc:coverage> <xsl:value-of select="concat('DEBUG: is_live = ', $is_live)" /> </dc:coverage>
-      <dc:coverage> <xsl:value-of select="concat('DEBUG: will_be_open_access = ', $will_be_open_access)" /> </dc:coverage>
-      <dc:coverage> <xsl:value-of select="concat('DEBUG: release_date_exists = ', $release_date_exists)" /> </dc:coverage>
-      <dc:coverage> <xsl:value-of select="concat('DEBUG: is_released = ', $is_released)" /> </dc:coverage>
+    <xsl:if test="$debug_level &gt;= 2">
+      <dc:coverage> <xsl:value-of select="concat('DEBUG: is_live                 = ', $is_live)" /> </dc:coverage>
+      <dc:coverage> <xsl:value-of select="concat('DEBUG: will_be_open_access     = ', $will_be_open_access)" /> </dc:coverage>
+      <dc:coverage> <xsl:value-of select="concat('DEBUG: s_is_valid_release_date = ', $s_is_valid_release_date)" /> </dc:coverage>
+      <dc:coverage> <xsl:value-of select="concat('DEBUG: is_released             = ', $is_released)" /> </dc:coverage>
       <dc:coverage/>
-      <dc:coverage> <xsl:value-of select="concat('DEBUG: today  = ', $today)" /> </dc:coverage>
-      <dc:coverage> <xsl:value-of select="concat('DEBUG: today2 = ', translate($today, '-', ''))" /> </dc:coverage>
+      <dc:coverage> <xsl:value-of select="concat('DEBUG: today         = ', $today)" /> </dc:coverage>
+      <dc:coverage> <xsl:value-of select="concat('DEBUG: today2        = ', translate($today, '-', ''))" /> </dc:coverage>
       <dc:coverage> <xsl:value-of select="concat('DEBUG: release_date  = ', release_date)" /> </dc:coverage>
       <dc:coverage> <xsl:value-of select="concat('DEBUG: release_date2 = ', translate(release_date, '-', ''))" /> </dc:coverage>
       <dc:coverage/>
     </xsl:if>
 
-    <xsl:if test="$is_live and $will_be_open_access and $release_date_exists and $is_released">
-      <xsl:apply-templates select="/xml/item/@id" />
-      <xsl:apply-templates select="/xml/item/curriculum/thesis/@type" />
-      <xsl:apply-templates select="/xml/item/curriculum/people/students/student/name_display" />
+    <xsl:choose>
+      <xsl:when test="$is_live and $will_be_open_access and $s_is_valid_release_date='true' and $is_released">
+        <xsl:apply-templates select="/xml/item/@id" />
+        <xsl:apply-templates select="/xml/item/curriculum/thesis/@type" />
+        <xsl:apply-templates select="/xml/item/curriculum/people/students/student/name_display" />
 
-      <xsl:apply-templates select="/xml/item/curriculum/thesis/version/abstract/text" />
-      <xsl:apply-templates select="/xml/item/curriculum/thesis/*[name()!='release']" />
-      <xsl:apply-templates select="/xml/item/curriculum/thesis/keywords/keyword" />
-      <xsl:apply-templates select="/xml/item/curriculum/thesis/agreements/copyright" />
-    </xsl:if>
+        <xsl:apply-templates select="/xml/item/curriculum/thesis/version/abstract/text" />
+        <xsl:apply-templates select="/xml/item/curriculum/thesis/*[name()!='release']" />
+        <xsl:apply-templates select="/xml/item/curriculum/thesis/keywords/keyword" />
+        <xsl:apply-templates select="/xml/item/curriculum/thesis/agreements/copyright" />
+      </xsl:when>
+
+      <xsl:otherwise>
+        <xsl:if test="$debug_level &gt;= 1">
+          <dc:coverage> <xsl:value-of select="'DEBUG: ITEM IS UNPUBLISHED OR UNDER EMBARGO OR HAS INVALID DATE FORMAT'" /> </dc:coverage>
+          <xsl:apply-templates select="/xml/item/@id" />
+        </xsl:if>
+      </xsl:otherwise>
+    </xsl:choose>
   </xsl:template>
 
   <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->

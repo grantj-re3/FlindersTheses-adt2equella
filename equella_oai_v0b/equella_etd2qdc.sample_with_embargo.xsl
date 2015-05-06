@@ -83,10 +83,10 @@
       translate($iso_date, '0123456789', '') = '--' and
       number(substring($iso_date, 1, 4)) &gt;= $year_min and
       number(substring($iso_date, 1, 4)) &lt;= $year_max and
-      number(substring($iso_date, 5, 1)) = '-' and
+      substring($iso_date, 5, 1) = '-' and
       number(substring($iso_date, 6, 2)) &gt;=  1 and
       number(substring($iso_date, 6, 2)) &lt;= 12 and
-      number(substring($iso_date, 8, 1)) = '-' and
+      substring($iso_date, 8, 1) = '-' and
       number(substring($iso_date, 9, 2)) &gt;=  1 and
       number(substring($iso_date, 9, 2)) &lt;= 31
     )"/>
@@ -177,6 +177,7 @@
        suppress from the apply-templates wildcard above
   -->
   <xsl:template match="/xml/item/curriculum/thesis/*[
+    name()!='release' and
     name()!='complete_year' and
     name()!='language' and
     name()!='publisher' and

@@ -1,0 +1,40 @@
+THE PROBLEM
+
+We were planning to harvest from Equella OAI-PMH as follows:
+ 1/ create Equella XML for all records (ie. "unapproved"; "approved but
+    embargoed/never to release"; "approved and public")
+ 2/ use Equella OAI-PMH XSLT to filter (and transform) the metadata to
+    only harvest "approved and public" records
+ 3/ harvest into Alma via OAI-PMH
+
+
+In the XSLT script, step 2 was achieved with:
+
+  <xsl:template match="/xml/item/curriculum/thesis/release">
+    ...
+    <xsl:when test="$is_live and $will_be_open_access and $s_is_valid_release_date='true' and $is_released">
+      Output the metadata.
+    </xsl:when>
+    ...
+  </xsl:template>
+
+
+However, for records which were *not* "approved and public", the Equella
+XSLT produced the following at the OAI-PMH interface:
+
+  <record>
+    <header> ... </header>
+    <metadata>
+      Either make this node empty or use an empty <oai_qdc:qualifieddc ...  /> element.
+    </metadata>
+  </record>
+
+which resulted in Alma errors (eg. "Mandatory field 245 is missing").
+
+
+CONCLUSION
+
+Use a different plan which involves Equella filtering out non-public
+records *before* reaching the XSLT processor. Hence the XSLT will be
+simpler as it will not filter-out any records.
+

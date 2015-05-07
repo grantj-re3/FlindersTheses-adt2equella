@@ -1,4 +1,5 @@
 <?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="equella_etd2qdc.sample_with_embargo.xsl"?>
 <xml>
   <item id="257cdf32-178b-4cf5-8cbd-83d42eb5591d" itemdefid="1bb07d74-be3c-41b9-8467-3096c2d21f25" itemstatus="live" key="5297159" moderating="false" version="1">
     <curriculum>

@@ -49,6 +49,9 @@
           <primary>School of Examples</primary>
         </schools>
         <complete_year>2015-12-01</complete_year>
+        <subjects>
+          <subject> ,, Cooking ,,Food preparation,,</subject>
+        </subjects>
         <title>TEST BBQs in the twenty first century</title>
         <faculties>
           <primary>Faculty of Examples</primary>

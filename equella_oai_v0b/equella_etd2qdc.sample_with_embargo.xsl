@@ -160,6 +160,7 @@
         <xsl:apply-templates select="/xml/item/curriculum/thesis/version/abstract/text" />
         <xsl:apply-templates select="/xml/item/curriculum/thesis/*[name()!='release']" />
         <xsl:apply-templates select="/xml/item/curriculum/thesis/keywords/keyword" />
+        <xsl:apply-templates select="/xml/item/curriculum/thesis/subjects/subject" />
         <xsl:apply-templates select="/xml/item/curriculum/thesis/agreements/copyright" />
       </xsl:when>
 
@@ -229,6 +230,15 @@
     <xsl:call-template name="split_into_elements">
       <xsl:with-param name="string" select="."/>
       <xsl:with-param name="element_name" select="'dc:subject'"/>
+      <xsl:with-param name="delim" select="','"/>
+    </xsl:call-template>
+  </xsl:template>
+
+  <!-- dc:subject.discipline -->
+  <xsl:template match="subjects/subject">
+    <xsl:call-template name="split_into_elements">
+      <xsl:with-param name="string" select="."/>
+      <xsl:with-param name="element_name" select="'dc:subject.discipline'"/>
       <xsl:with-param name="delim" select="','"/>
     </xsl:call-template>
   </xsl:template>

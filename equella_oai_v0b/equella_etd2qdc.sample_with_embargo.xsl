@@ -18,10 +18,10 @@
   <xsl:strip-space elements="*" />
 
   <!-- 0 = No debug; 1 = Debug info; 2 = More debug info -->
-  <xsl:variable name="debug_level" select="1"/>
+  <xsl:variable name="debug_level" select="1" />
 
-  <xsl:variable name="today" select="substring(date:date-time(),1,10)"/>
-  <xsl:variable name="identifier_prefix" select="'flex-'"/>
+  <xsl:variable name="today" select="substring(date:date-time(),1,10)" />
+  <xsl:variable name="identifier_prefix" select="'flex-'" />
   <xsl:variable name="rights_statement" 
     select="'This electronic version is made publicly available by Flinders University in accordance with its open access policy for student theses. Copyright in this thesis remains with the author. This thesis may incorporate third party material which has been used by the author pursuant to Fair Dealing exceptions. If you are the owner of any included third party copyright material and/or you believe that any material has been made available without permission of the copyright owner please contact copyright@flinders.edu.au with the details'"
   />
@@ -39,33 +39,33 @@
          <count>Normalise:two</count>
   -->
   <xsl:template name="split_into_elements">
-    <xsl:param name="string"/>
-    <xsl:param name="element_name"/>
-    <xsl:param name="element_value_prefix" select="''"/>
-    <xsl:param name="delim" select="','"/>
+    <xsl:param name="string" />
+    <xsl:param name="element_name" />
+    <xsl:param name="element_value_prefix" select="''" />
+    <xsl:param name="delim" select="','" />
 
     <xsl:choose>
       <xsl:when test="contains($string, $delim)">
-        <xsl:variable name="trimmed_str" select="normalize-space(substring-before($string, $delim))"/>
+        <xsl:variable name="trimmed_str" select="normalize-space(substring-before($string, $delim))" />
         <xsl:if test="$trimmed_str != ''">
           <xsl:element name="{$element_name}">
-            <xsl:value-of select="concat($element_value_prefix, $trimmed_str)"/>
+            <xsl:value-of select="concat($element_value_prefix, $trimmed_str)" />
           </xsl:element>
         </xsl:if>
 
         <xsl:call-template name="split_into_elements">
-          <xsl:with-param name="string" select="substring-after($string, $delim)"/>
-          <xsl:with-param name="element_name" select="$element_name"/>
-          <xsl:with-param name="element_value_prefix" select="$element_value_prefix"/>
-          <xsl:with-param name="delim" select="$delim"/>
+          <xsl:with-param name="string" select="substring-after($string, $delim)" />
+          <xsl:with-param name="element_name" select="$element_name" />
+          <xsl:with-param name="element_value_prefix" select="$element_value_prefix" />
+          <xsl:with-param name="delim" select="$delim" />
         </xsl:call-template>
       </xsl:when>
 
       <xsl:otherwise>
-        <xsl:variable name="trimmed_str" select="normalize-space($string)"/>
+        <xsl:variable name="trimmed_str" select="normalize-space($string)" />
         <xsl:if test="$trimmed_str != ''">
           <xsl:element name="{$element_name}">
-            <xsl:value-of select="concat($element_value_prefix, $trimmed_str)"/>
+            <xsl:value-of select="concat($element_value_prefix, $trimmed_str)" />
           </xsl:element>
         </xsl:if>
       </xsl:otherwise>
@@ -76,9 +76,9 @@
   <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
   <!-- Return string 'true' if iso_date param has format YYYY-MM-DD; else return 'false' -->
   <xsl:template name="is_iso_date">
-    <xsl:param name="iso_date"/>
-    <xsl:param name="year_min" select="'1900'"/>
-    <xsl:param name="year_max" select="'2099'"/>
+    <xsl:param name="iso_date" />
+    <xsl:param name="year_min" select="'1900'" />
+    <xsl:param name="year_max" select="'2099'" />
 
     <xsl:value-of select="boolean(
       string-length($iso_date) = 10 and
@@ -91,7 +91,7 @@
       substring($iso_date, 8, 1) = '-' and
       number(substring($iso_date, 9, 2)) &gt;=  1 and
       number(substring($iso_date, 9, 2)) &lt;= 31
-    )"/>
+    )" />
   </xsl:template>
 
   <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
@@ -136,7 +136,7 @@
     <xsl:variable name="is_released" select="boolean(translate(release_date, '-', '') &lt;=  translate($today, '-', ''))" />
     <xsl:variable name="s_is_valid_release_date">
       <xsl:call-template name="is_iso_date">
-        <xsl:with-param name="iso_date" select="release_date"/>
+        <xsl:with-param name="iso_date" select="release_date" />
       </xsl:call-template>
     </xsl:variable>
 
@@ -216,34 +216,34 @@
   <!-- dc:identifier -->
   <xsl:template match="item/@id">
     <dc:identifier>
-      <xsl:value-of select="concat($identifier_prefix, .)"/>
+      <xsl:value-of select="concat($identifier_prefix, .)" />
     </dc:identifier>
   </xsl:template>
 
   <!-- dc:rights -->
   <xsl:template match="copyright">
     <xsl:if test=". = 'Yes'">
-      <dc:rights> <xsl:value-of select="$rights_statement"/> </dc:rights>
+      <dc:rights> <xsl:value-of select="$rights_statement" /> </dc:rights>
     </xsl:if>
   </xsl:template>
 
   <!-- dc:subject -->
   <xsl:template match="keyword">
     <xsl:call-template name="split_into_elements">
-      <xsl:with-param name="string" select="."/>
-      <xsl:with-param name="element_name" select="'dc:subject'"/>
-      <xsl:with-param name="element_value_prefix" select="''"/>
-      <xsl:with-param name="delim" select="','"/>
+      <xsl:with-param name="string" select="." />
+      <xsl:with-param name="element_name" select="'dc:subject'" />
+      <xsl:with-param name="element_value_prefix" select="''" />
+      <xsl:with-param name="delim" select="','" />
     </xsl:call-template>
   </xsl:template>
 
   <!-- dc:subject (discipline) -->
   <xsl:template match="subjects/subject">
     <xsl:call-template name="split_into_elements">
-      <xsl:with-param name="string" select="."/>
-      <xsl:with-param name="element_name" select="'dc:subject'"/>
-      <xsl:with-param name="element_value_prefix" select="'Subject discipline:'"/>
-      <xsl:with-param name="delim" select="','"/>
+      <xsl:with-param name="string" select="." />
+      <xsl:with-param name="element_name" select="'dc:subject'" />
+      <xsl:with-param name="element_value_prefix" select="'Subject discipline:'" />
+      <xsl:with-param name="delim" select="','" />
     </xsl:call-template>
   </xsl:template>
 

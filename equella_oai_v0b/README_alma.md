@@ -4,15 +4,17 @@
 ## Create an Import Profile for a Digital profile-type
 - Prerequisite: In Equella, create an OAI-PMH data provider for Qualified Dublin Core, QDC (or Dublin Core, DC)
 - Prerequisite: Create a top level collection and sub-collection
-- [Optional: Create a normalization rule for subject-discipline](#Create-a-normalization-rule-for-subject-discipline)
+- Optional: [Create a normalization rule for subject-discipline](#create-a-normalization-rule-for-subject-discipline)
 
 ## Steps
+- Resource Management > Resource Configuration > Configuration Menu > Record Import > Import Profiles
 
 ## Create a normalization rule for subject-discipline
 
 Equella OAI-PMH delivers 2 types of subject metadata.
-1. <dc:subject>Barbeque</dc:subject> which maps to MARC 653$a.
-2. <dc:subject>Subject discipline:Cooking</dc:subject> which also maps
+
+1. &lt;dc:subject>Barbeque&lt;/dc:subject> which maps to MARC 653$a.
+2. &lt;dc:subject>Subject discipline:Cooking&lt;/dc:subject> which also maps
    to MARC 653$a, but the "Subject discipline:" prefix tells Alma that
    we want it to map to 695$a. We can achieve this mapping with the
    following Alma normalization rule.

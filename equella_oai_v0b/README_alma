@@ -8,7 +8,7 @@ Equella OAI-PMH delivers 2 types of subject metadata.
     following Alma normalization rule.
 
 
-    rule "Copy 653 to 695 if 653.a starts-with 'Subject discipline:'; Remove 'Subject discipline:'"
+    rule "Move 653 to 695 if 653.a starts-with 'Subject discipline:'; Remove 'Subject discipline:'"
       when
         (TRUE)
       then

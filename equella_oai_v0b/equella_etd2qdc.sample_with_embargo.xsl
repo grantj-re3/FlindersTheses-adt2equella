@@ -18,7 +18,12 @@
   <xsl:strip-space elements="*" />
 
   <!-- 0 = No debug; 1 = Debug info; 2 = More debug info -->
-  <xsl:variable name="debug_level" select="1" />
+  <xsl:variable name="debug_level" select="'1'" />
+  <!-- Output debug info using this element name.
+       Choose a field which will cause Alma to NOT load
+       "unexpected" records (eg. do NOT use dc:title).
+  -->
+  <xsl:variable name="debug_element_name" select="'dc:coverage'" />
 
   <xsl:variable name="today" select="substring(date:date-time(),1,10)" />
   <xsl:variable name="identifier_prefix" select="'flex-'" />
@@ -112,24 +117,15 @@
   </xsl:template>
 
   <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
-  <!--
-     5/5/15 Testing required:
-     - Need to test if record is published
-     - Need to test embargo function
-     - Need to populate, configure & test the custom field dc:subject.discipline 
-       (config may involve inventing our own schema)
-     - Need to harvest via OAI-PMH
-  -->
-  <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
   <xsl:template match="/xml/item/curriculum/thesis/release">
     <!--
-      Make OAI-PMH metadata available if:
+      Make OAI-PMH record available if:
         /xml/item/@itemstatus = 'live' and
         (/xml/item/curriculum/thesis/release/status = 'Open Access' or 'Restricted Access') and
         /xml/item/curriculum/thesis/release/release_date has format YYYY-MM-DD and
         /xml/item/curriculum/thesis/release/release_date <= today
 
-      We need very strict control of release_date format!
+      We need very strict control of release_date format to properly hide embargo info!
     -->
     <xsl:variable name="is_live" select="boolean(/xml/item/@itemstatus = 'live')" />
     <xsl:variable name="will_be_open_access" select="boolean(status = 'Open Access' or status = 'Restricted Access')" />
@@ -141,16 +137,16 @@
     </xsl:variable>
 
     <xsl:if test="$debug_level &gt;= 2">
-      <dc:coverage> <xsl:value-of select="concat('DEBUG: is_live                 = ', $is_live)" /> </dc:coverage>
-      <dc:coverage> <xsl:value-of select="concat('DEBUG: will_be_open_access     = ', $will_be_open_access)" /> </dc:coverage>
-      <dc:coverage> <xsl:value-of select="concat('DEBUG: s_is_valid_release_date = ', $s_is_valid_release_date)" /> </dc:coverage>
-      <dc:coverage> <xsl:value-of select="concat('DEBUG: is_released             = ', $is_released)" /> </dc:coverage>
-      <dc:coverage />
-      <dc:coverage> <xsl:value-of select="concat('DEBUG: today         = ', $today)" /> </dc:coverage>
-      <dc:coverage> <xsl:value-of select="concat('DEBUG: today2        = ', translate($today, '-', ''))" /> </dc:coverage>
-      <dc:coverage> <xsl:value-of select="concat('DEBUG: release_date  = ', release_date)" /> </dc:coverage>
-      <dc:coverage> <xsl:value-of select="concat('DEBUG: release_date2 = ', translate(release_date, '-', ''))" /> </dc:coverage>
-      <dc:coverage />
+      <xsl:element name="{$debug_element_name}"> <xsl:value-of select="concat('DEBUG: is_live                 = ', $is_live)" /> </xsl:element>
+      <xsl:element name="{$debug_element_name}"> <xsl:value-of select="concat('DEBUG: will_be_open_access     = ', $will_be_open_access)" /> </xsl:element>
+      <xsl:element name="{$debug_element_name}"> <xsl:value-of select="concat('DEBUG: s_is_valid_release_date = ', $s_is_valid_release_date)" /> </xsl:element>
+      <xsl:element name="{$debug_element_name}"> <xsl:value-of select="concat('DEBUG: is_released             = ', $is_released)" /> </xsl:element>
+      <xsl:element name="{$debug_element_name}" />
+      <xsl:element name="{$debug_element_name}"> <xsl:value-of select="concat('DEBUG: today         = ', $today)" /> </xsl:element>
+      <xsl:element name="{$debug_element_name}"> <xsl:value-of select="concat('DEBUG: today2        = ', translate($today, '-', ''))" /> </xsl:element>
+      <xsl:element name="{$debug_element_name}"> <xsl:value-of select="concat('DEBUG: release_date  = ', release_date)" /> </xsl:element>
+      <xsl:element name="{$debug_element_name}"> <xsl:value-of select="concat('DEBUG: release_date2 = ', translate(release_date, '-', ''))" /> </xsl:element>
+      <xsl:element name="{$debug_element_name}" />
     </xsl:if>
 
     <xsl:choose>
@@ -167,9 +163,10 @@
       </xsl:when>
 
       <xsl:otherwise>
+        <!-- Unexpected record --> 
         <xsl:if test="$debug_level &gt;= 1">
-          <dc:coverage> <xsl:value-of select="'DEBUG: ITEM IS UNPUBLISHED OR UNDER EMBARGO OR HAS INVALID DATE FORMAT'" /> </dc:coverage>
-          <dc:coverage> <xsl:value-of select="concat('Unexpected record. Identifier: ', $identifier_prefix, /xml/item/@id)" /> </dc:coverage>
+          <xsl:element name="{$debug_element_name}"> <xsl:value-of select="'DEBUG: ITEM IS UNPUBLISHED OR UNDER EMBARGO OR HAS AN INVALID DATE FORMAT'" /> </xsl:element>
+          <xsl:element name="{$debug_element_name}"> <xsl:value-of select="concat('DEBUG: Unexpected record. Identifier: ', $identifier_prefix, /xml/item/@id)" /> </xsl:element>
         </xsl:if>
       </xsl:otherwise>
     </xsl:choose>

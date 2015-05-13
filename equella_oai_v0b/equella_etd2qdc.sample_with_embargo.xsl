@@ -18,7 +18,7 @@
   <xsl:strip-space elements="*" />
 
   <!-- 0 = No debug; 1 = Debug info; 2 = More debug info -->
-  <xsl:variable name="debug_level" select="0"/>
+  <xsl:variable name="debug_level" select="1"/>
 
   <xsl:variable name="today" select="substring(date:date-time(),1,10)"/>
   <xsl:variable name="identifier_prefix" select="'flex-'"/>
@@ -145,12 +145,12 @@
       <dc:coverage> <xsl:value-of select="concat('DEBUG: will_be_open_access     = ', $will_be_open_access)" /> </dc:coverage>
       <dc:coverage> <xsl:value-of select="concat('DEBUG: s_is_valid_release_date = ', $s_is_valid_release_date)" /> </dc:coverage>
       <dc:coverage> <xsl:value-of select="concat('DEBUG: is_released             = ', $is_released)" /> </dc:coverage>
-      <dc:coverage/>
+      <dc:coverage />
       <dc:coverage> <xsl:value-of select="concat('DEBUG: today         = ', $today)" /> </dc:coverage>
       <dc:coverage> <xsl:value-of select="concat('DEBUG: today2        = ', translate($today, '-', ''))" /> </dc:coverage>
       <dc:coverage> <xsl:value-of select="concat('DEBUG: release_date  = ', release_date)" /> </dc:coverage>
       <dc:coverage> <xsl:value-of select="concat('DEBUG: release_date2 = ', translate(release_date, '-', ''))" /> </dc:coverage>
-      <dc:coverage/>
+      <dc:coverage />
     </xsl:if>
 
     <xsl:choose>
@@ -169,7 +169,7 @@
       <xsl:otherwise>
         <xsl:if test="$debug_level &gt;= 1">
           <dc:coverage> <xsl:value-of select="'DEBUG: ITEM IS UNPUBLISHED OR UNDER EMBARGO OR HAS INVALID DATE FORMAT'" /> </dc:coverage>
-          <xsl:apply-templates select="/xml/item/@id" />
+          <dc:coverage> <xsl:value-of select="concat('Unexpected record. Identifier: ', $identifier_prefix, /xml/item/@id)" /> </dc:coverage>
         </xsl:if>
       </xsl:otherwise>
     </xsl:choose>

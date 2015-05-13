@@ -1,0 +1,28 @@
+# Alma configuration
+
+
+## Create an Import Profile for a Digital profile-type
+- Prerequisite: In Equella, create an OAI-PMH data provider for Qualified Dublin Core, QDC (or Dublin Core, DC)
+- Prerequisite: Create a top level collection and sub-collection
+- [Optional: Create a normalization rule for subject-discipline](#Create-a-normalization-rule-for-subject-discipline)
+
+## Steps
+
+## Create a normalization rule for subject-discipline
+
+Equella OAI-PMH delivers 2 types of subject metadata.
+1. <dc:subject>Barbeque</dc:subject> which maps to MARC 653$a.
+2. <dc:subject>Subject discipline:Cooking</dc:subject> which also maps
+   to MARC 653$a, but the "Subject discipline:" prefix tells Alma that
+   we want it to map to 695$a. We can achieve this mapping with the
+   following Alma normalization rule.
+
+```
+  rule "Move 653 to 695 if 653.a starts-with 'Subject discipline:'; Remove 'Subject discipline:'"
+    when
+      (TRUE)
+    then
+      changeField "653" to "695" if (exists "653.a.Subject discipline:*")
+      replaceContents "695.a.Subject discipline:" with ""
+  end
+```

@@ -35,6 +35,11 @@ which resulted in Alma errors (eg. "Mandatory field 245 is missing").
 CONCLUSION
 
 Use a different plan which involves Equella filtering out non-public
-records *before* reaching the XSLT processor. Hence the XSLT will be
-simpler as it will not filter-out any records.
+records *before* reaching the XSLT processor. We may still chose to
+filter out records in XSLT which means that both Equella and Equella-
+XSLT areas would be involved in ensuring non-public records are not
+made public.
+
+The Equella OAI-PMH record filtering could be achieved using Item
+Filtering or Dynamic Filtering within a Dynamic Collection.
 

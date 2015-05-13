@@ -34,13 +34,14 @@
        - Sub-fields are "trimmed" with normalize-space()
        - Empty "trimmed" sub-fields are omitted from the output
        Eg. If string="'one,, two ,'" and element_name="'count'" and
-       delim="','", this function produces:
-         <count>one</count>
-         <count>two</count>
+       element_value_prefix="'Normalise:'" and delim="','", this function produces:
+         <count>Normalise:one</count>
+         <count>Normalise:two</count>
   -->
   <xsl:template name="split_into_elements">
     <xsl:param name="string"/>
     <xsl:param name="element_name"/>
+    <xsl:param name="element_value_prefix" select="''"/>
     <xsl:param name="delim" select="','"/>
 
     <xsl:choose>
@@ -48,13 +49,14 @@
         <xsl:variable name="trimmed_str" select="normalize-space(substring-before($string, $delim))"/>
         <xsl:if test="$trimmed_str != ''">
           <xsl:element name="{$element_name}">
-            <xsl:value-of select="$trimmed_str"/>
+            <xsl:value-of select="concat($element_value_prefix, $trimmed_str)"/>
           </xsl:element>
         </xsl:if>
 
         <xsl:call-template name="split_into_elements">
           <xsl:with-param name="string" select="substring-after($string, $delim)"/>
           <xsl:with-param name="element_name" select="$element_name"/>
+          <xsl:with-param name="element_value_prefix" select="$element_value_prefix"/>
           <xsl:with-param name="delim" select="$delim"/>
         </xsl:call-template>
       </xsl:when>
@@ -63,7 +65,7 @@
         <xsl:variable name="trimmed_str" select="normalize-space($string)"/>
         <xsl:if test="$trimmed_str != ''">
           <xsl:element name="{$element_name}">
-            <xsl:value-of select="$trimmed_str"/>
+            <xsl:value-of select="concat($element_value_prefix, $trimmed_str)"/>
           </xsl:element>
         </xsl:if>
       </xsl:otherwise>
@@ -230,15 +232,17 @@
     <xsl:call-template name="split_into_elements">
       <xsl:with-param name="string" select="."/>
       <xsl:with-param name="element_name" select="'dc:subject'"/>
+      <xsl:with-param name="element_value_prefix" select="''"/>
       <xsl:with-param name="delim" select="','"/>
     </xsl:call-template>
   </xsl:template>
 
-  <!-- dc:subject.discipline -->
+  <!-- dc:subject (discipline) -->
   <xsl:template match="subjects/subject">
     <xsl:call-template name="split_into_elements">
       <xsl:with-param name="string" select="."/>
-      <xsl:with-param name="element_name" select="'dc:subject.discipline'"/>
+      <xsl:with-param name="element_name" select="'dc:subject'"/>
+      <xsl:with-param name="element_value_prefix" select="'Subject discipline:'"/>
       <xsl:with-param name="delim" select="','"/>
     </xsl:call-template>
   </xsl:template>

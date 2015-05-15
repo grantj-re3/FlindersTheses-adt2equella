@@ -32,7 +32,7 @@
   * Upon match: Overlay
   * Merge method: [Overlay all fields but local]
   * ...
-  * Upon no match: \[Import\]
+  * Upon no match: [Import]
   * Click Next
 - Part 4
   * Leave defaults
@@ -64,7 +64,7 @@ Equella OAI-PMH delivers 2 types of subject metadata.
   end
 ```
 
-## Create a normalization rule for ...
+## Create a normalization rule for MARC Leader
 
 ```
   rule "Equella Research Higher Degree thesis - fix LDR"

@@ -121,36 +121,18 @@
     <!--
       Make OAI-PMH record available if:
         /xml/item/@itemstatus = 'live' and
-        (/xml/item/curriculum/thesis/release/status = 'Open Access' or 'Restricted Access') and
-        /xml/item/curriculum/thesis/release/release_date has format YYYY-MM-DD and
-        /xml/item/curriculum/thesis/release/release_date <= today
-
-      We need very strict control of release_date format to properly hide embargo info!
+        /xml/item/curriculum/thesis/release/status = ('Open Access' or 'Restricted Access')
     -->
     <xsl:variable name="is_live" select="boolean(/xml/item/@itemstatus = 'live')" />
     <xsl:variable name="will_be_open_access" select="boolean(status = 'Open Access' or status = 'Restricted Access')" />
-    <xsl:variable name="is_released" select="boolean(translate(release_date, '-', '') &lt;=  translate($today, '-', ''))" />
-    <xsl:variable name="s_is_valid_release_date">
-      <xsl:call-template name="is_iso_date">
-        <xsl:with-param name="iso_date" select="release_date" />
-      </xsl:call-template>
-    </xsl:variable>
 
     <xsl:if test="$debug_level &gt;= 2">
       <xsl:element name="{$debug_element_name}"> <xsl:value-of select="concat('DEBUG: is_live                 = ', $is_live)" /> </xsl:element>
       <xsl:element name="{$debug_element_name}"> <xsl:value-of select="concat('DEBUG: will_be_open_access     = ', $will_be_open_access)" /> </xsl:element>
-      <xsl:element name="{$debug_element_name}"> <xsl:value-of select="concat('DEBUG: s_is_valid_release_date = ', $s_is_valid_release_date)" /> </xsl:element>
-      <xsl:element name="{$debug_element_name}"> <xsl:value-of select="concat('DEBUG: is_released             = ', $is_released)" /> </xsl:element>
-      <xsl:element name="{$debug_element_name}" />
-      <xsl:element name="{$debug_element_name}"> <xsl:value-of select="concat('DEBUG: today         = ', $today)" /> </xsl:element>
-      <xsl:element name="{$debug_element_name}"> <xsl:value-of select="concat('DEBUG: today2        = ', translate($today, '-', ''))" /> </xsl:element>
-      <xsl:element name="{$debug_element_name}"> <xsl:value-of select="concat('DEBUG: release_date  = ', release_date)" /> </xsl:element>
-      <xsl:element name="{$debug_element_name}"> <xsl:value-of select="concat('DEBUG: release_date2 = ', translate(release_date, '-', ''))" /> </xsl:element>
-      <xsl:element name="{$debug_element_name}" />
     </xsl:if>
 
     <xsl:choose>
-      <xsl:when test="$is_live and $will_be_open_access and $s_is_valid_release_date='true' and $is_released">
+      <xsl:when test="$is_live and $will_be_open_access">
         <xsl:apply-templates select="/xml/item/@id" />
         <xsl:apply-templates select="/xml/item/curriculum/thesis/@type" />
         <xsl:apply-templates select="/xml/item/curriculum/people/students/student/name_display" />
@@ -160,6 +142,7 @@
         <xsl:apply-templates select="/xml/item/curriculum/thesis/keywords/keyword" />
         <xsl:apply-templates select="/xml/item/curriculum/thesis/subjects/subject" />
         <xsl:apply-templates select="/xml/item/curriculum/thesis/agreements/copyright" />
+        <xsl:apply-templates select="/xml/item/curriculum/thesis/release/release_date" />
       </xsl:when>
 
       <xsl:otherwise>
@@ -190,6 +173,36 @@
     <xsl:element name="dc:{name()}" namespace="http://purl.org/dc/elements/1.1/">
       <xsl:value-of select="." />
     </xsl:element>
+  </xsl:template>
+
+  <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
+  <!-- dcterms:available -->
+  <!-- Output format as ISO date: YYYY-MM
+       Map to MARC 263 (with format YYYYMM)
+       Only populate this item if release_date is in the future.
+
+       We need very strict control of release_date format!
+  -->
+  <xsl:template match="release/release_date">
+    <xsl:variable name="is_in_future" select="boolean(translate(., '-', '') &gt;=  translate($today, '-', ''))" />
+    <xsl:variable name="s_is_valid_release_date">
+      <xsl:call-template name="is_iso_date">
+        <xsl:with-param name="iso_date" select="." />
+      </xsl:call-template>
+    </xsl:variable>
+
+    <xsl:if test="$debug_level &gt;= 2">
+      <xsl:element name="{$debug_element_name}"> <xsl:value-of select="concat('DEBUG: is_in_future            = ', $is_in_future)" /> </xsl:element>
+      <xsl:element name="{$debug_element_name}"> <xsl:value-of select="concat('DEBUG: s_is_valid_release_date = ', $s_is_valid_release_date)" /> </xsl:element>
+      <xsl:element name="{$debug_element_name}"> <xsl:value-of select="concat('DEBUG: today         = ', $today)" /> </xsl:element>
+      <xsl:element name="{$debug_element_name}"> <xsl:value-of select="concat('DEBUG: today2        = ', translate($today, '-', ''))" /> </xsl:element>
+      <xsl:element name="{$debug_element_name}"> <xsl:value-of select="concat('DEBUG: release_date  = ', .)" /> </xsl:element>
+      <xsl:element name="{$debug_element_name}"> <xsl:value-of select="concat('DEBUG: release_date2 = ', translate(., '-', ''))" /> </xsl:element>
+    </xsl:if>
+
+    <xsl:if test="$is_in_future and $s_is_valid_release_date='true'">
+      <dcterms:available> <xsl:value-of select="substring(., 1, 7)" /> </dcterms:available>
+    </xsl:if>
   </xsl:template>
 
   <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->

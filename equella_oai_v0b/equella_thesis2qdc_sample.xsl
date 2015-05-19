@@ -32,6 +32,14 @@
     select="'This electronic version is made publicly available by Flinders University in accordance with its open access policy for student theses. Copyright in this thesis remains with the author. This thesis may incorporate third party material which has been used by the author pursuant to Fair Dealing exceptions. If you are the owner of any included third party copyright material and/or you believe that any material has been made available without permission of the copyright owner please contact copyright@flinders.edu.au with the details'"
   />
 
+  <xsl:variable name="access_restrictions_note_marc506_a" 
+    select="'My embargo access restrictions...'"
+  />
+
+  <xsl:variable name="electronic_location_public_note_marc856_z" 
+    select="'My electronic location public note...'"
+  />
+
   <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
   <!-- TEMPLATE-BASED FUNCTIONS - can only return text or element-sequences -->
   <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
@@ -177,12 +185,11 @@
   </xsl:template>
 
   <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
-  <!-- dcterms:available -->
-  <!-- Output format as ISO date: YYYY-MM
-       Map to MARC 263 (with format YYYYMM)
-       Only populate this item if release_date is in the future.
-
-       We need very strict control of release_date format!
+  <!-- dc:rights (for MARC 856$z) -->
+  <!-- dcterms:accessRights (for MARC 506$a) -->
+  <!-- dcterms:available (as YYYY-MM for MARC 263$a as YYYYMM) -->
+  <!-- - Only populate if release_date is in the future.
+       - We need very strict control of release_date format!
   -->
   <xsl:template match="release/release_date">
     <xsl:variable name="is_in_future" select="boolean(translate(., '-', '') &gt;=  translate($today, '-', ''))" />
@@ -202,6 +209,8 @@
     </xsl:if>
 
     <xsl:if test="$is_in_future and $s_is_valid_release_date='true'">
+      <dc:rights> <xsl:value-of select="concat('Note: ', $electronic_location_public_note_marc856_z)" /> </dc:rights>
+      <dcterms:accessRights> <xsl:value-of select="$access_restrictions_note_marc506_a" /> </dcterms:accessRights>
       <dcterms:available> <xsl:value-of select="substring(., 1, 7)" /> </dcterms:available>
     </xsl:if>
   </xsl:template>

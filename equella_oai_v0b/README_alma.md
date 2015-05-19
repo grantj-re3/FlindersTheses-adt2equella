@@ -44,7 +44,9 @@
   * IE Entity Type: [Generic Resource]
   * Click Save
 
-## Create a normalization rule for subject-discipline
+## Normalization rules
+
+### Normalization rule for subject-discipline
 
 Equella OAI-PMH delivers 2 types of subject metadata.
 
@@ -55,19 +57,19 @@ Equella OAI-PMH delivers 2 types of subject metadata.
    following Alma normalization rule.
 
 ```
-  rule "Move 653 to 695 if 653.a starts-with 'Subject discipline:'; Remove 'Subject discipline:'"
+  rule "Equella thesis - move 653 to 695 if 653.a starts-with 'Subject discipline:'; Remove 'Subject discipline:'"
     when
-      (TRUE)
+      exists "024.a.flex-*"
     then
       changeField "653" to "695" if (exists "653.a.Subject discipline:*")
       replaceContents "695.a.Subject discipline:" with ""
   end
 ```
 
-## Create a normalization rule for MARC Leader
+### Normalization rule for MARC Leader
 
 ```
-  rule "Equella Research Higher Degree thesis - fix LDR"
+  rule "Equella thesis - fix LDR"
     when
       exists "024.a.flex-*"
     then
@@ -77,5 +79,21 @@ Equella OAI-PMH delivers 2 types of subject metadata.
       ReplaceControlContents "LDR.{22,1}" with "0" if(existsControl "LDR.{22,1}. ")
       ReplaceControlContents "LDR.{23,1}" with "0" if(existsControl "LDR.{23,1}. ")
   end
+```
+
+### Normalization rule for target URL
+
+```
+rule "Equella thesis - move 024.a to 856.u if 024.a is a hyperlink"
+  when
+    exists "024.a.flex-*"
+  then
+    changeField "024" to "856" if (exists "024.a.http://*")
+    changeField "024" to "856" if (exists "024.a.https://*")
+    changeSubField "856.a" to "u"
+    changeFirstIndicator "856" to "4"
+    changeSecondIndicator "856" to "1"
+    addSubField "856.z.My electronic location - public note (Norm Rule in Alma)."
+end
 ```
 

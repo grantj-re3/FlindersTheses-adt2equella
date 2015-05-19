@@ -33,7 +33,7 @@
   />
 
   <xsl:variable name="access_restrictions_note_marc506_a" 
-    select="'My embargo access restrictions...'"
+    select="'This item is under embargo. See repository record for release date information.'"
   />
 
   <xsl:variable name="electronic_location_public_note_marc856_z" 
@@ -185,7 +185,6 @@
   </xsl:template>
 
   <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
-  <!-- dc:rights (for MARC 856$z) -->
   <!-- dcterms:accessRights (for MARC 506$a) -->
   <!-- dcterms:available (as YYYY-MM for MARC 263$a as YYYYMM) -->
   <!-- - Only populate if release_date is in the future.
@@ -209,7 +208,14 @@
     </xsl:if>
 
     <xsl:if test="$is_in_future and $s_is_valid_release_date='true'">
+      <!--
+        It appears MARC 856$z must be populated with fixed-text via an
+        Alma normalization rule because there is no rule which will
+        merge XXX$a into 856$z of an *existing* 856 field (ie. with
+        856$u already populated).
+
       <dc:rights> <xsl:value-of select="concat('Note: ', $electronic_location_public_note_marc856_z)" /> </dc:rights>
+      -->
       <dcterms:accessRights> <xsl:value-of select="$access_restrictions_note_marc506_a" /> </dcterms:accessRights>
       <dcterms:available> <xsl:value-of select="substring(., 1, 7)" /> </dcterms:available>
     </xsl:if>

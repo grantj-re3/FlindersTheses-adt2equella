@@ -31,8 +31,8 @@
        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
        We can pass these parameters into this XSLT script from the command
        line using the xsltproc "param" or "stringparam" option. Eg.
-         xsltproc \-\-param add_csv_header "true()"  \-\-stringparam embargoed_str t ...
-         xsltproc \-\-param add_csv_header "false()" \-\-stringparam embargoed_str f ...
+         xsltproc \-\-param add_csv_header "true()"  \-\-stringparam embargoed_str false ...
+         xsltproc \-\-param add_csv_header "false()" \-\-stringparam embargoed_str true ...
   -->
   <xsl:param name="add_csv_header" select="true()" />
   <xsl:param name="embargoed_str" select="''"/>
@@ -44,34 +44,39 @@
  
   <!-- An "array" containing the XML field-names (and their associated CSV header-names) -->
   <xsl:variable name="fieldArray">
-    <field csv_header_name="item/rhd/creator">DC.Creator.personalName</field>
-    <field csv_header_name="item/rhd/creator_email">DC.Creator.personalName.address</field>
-    <field csv_header_name="item/rhd/title">DC.Title</field>
+    <field csv_header_name="item/curriculum/people/students/student/name_display">DC.Creator.personalName</field>
+    <field csv_header_name="item/curriculum/people/students/student/email">DC.Creator.personalName.address</field>
+    <field csv_header_name="item/curriculum/thesis/title">DC.Title</field>
 
-    <field csv_header_name="item/rhd/subject">DC.Subject</field>
-    <field csv_header_name="item/rhd/description">DC.Description.abstract</field>
-    <field csv_header_name="item/rhd/complete_year">DC.Date.valid</field>
-    <field csv_header_name="item/rhd/language">DC.Language</field>
-    <!-- I think DC.Publisher is derived from X.institution & X.school; use the components ?????????????????
-    <field csv_header_name="/xml/item/publisher">DC.Publisher</field>
+    <!-- FIXME: Single comma separated field? -->
+    <!-- FIXME: ADT does not have any library-selected disciplines to populate item/curriculum/thesis/subjects/subject -->
+    <field csv_header_name="item/curriculum/thesis/keywords/keyword">DC.Subject</field>
+    <field csv_header_name="item/curriculum/thesis/version/abstract/text">DC.Description.abstract</field>
+    <field csv_header_name="item/curriculum/thesis/complete_year">DC.Date.valid</field>
+    <field csv_header_name="item/curriculum/thesis/language">DC.Language</field>
+    <!-- FIXME: I think DC.Publisher is derived from X.institution & X.school; use the components?
+    <field csv_header_name="item/curriculum/thesis/publisher">DC.Publisher</field>
     -->
+    <!-- FIXME: What agreements should be completed at item/curriculum/thesis/agreements/* ?
     <field csv_header_name="item/rhd/statement/text">DC.Rights</field>
+    -->
+    <!-- FIXME: What is XPath for previous ADT identifier?
     <field csv_header_name="item/rhd/previous_identifier_url">DC.Identifier</field>
+    -->
 
     <!-- Use X.thesis_type which is derived from X.dtype & X.degree
     <field csv_header_name="item/rhd/dtype">X.dtype</field>
     <field csv_header_name="item/rhd/degree">X.degree</field>
     -->
-    <field csv_header_name="item/rhd/thesis_type">X.thesis_type</field>
-    <field csv_header_name="item/rhd/publisher">X.institution</field>
-    <field csv_header_name="item/rhd/deptdegree">X.dept</field>
-    <field csv_header_name="item/rhd/school">X.school</field>
-    <field csv_header_name="item/rhd/supervisor">X.chair</field>
-    <!-- component of DC.Identifier ?????????????????????????
-    <field csv_header_name="/xml/item/dir_name">X.dir_name</field>
-    -->
-    <field csv_header_name="item/rhd/publish_date">X.upload_date</field>
-    <field csv_header_name="item/rhd/attachment">I.attachment</field>
+    <field csv_header_name="item/curriculum/thesis/@type">X.thesis_type</field>
+    <field csv_header_name="item/curriculum/thesis/publisher">X.institution</field>
+    <field csv_header_name="item/curriculum/thesis/faculties/primary">X.dept</field>
+    <field csv_header_name="item/curriculum/thesis/schools/primary">X.school</field>
+    <field csv_header_name="item/curriculum/people/coords/coord/name">X.chair</field>
+    <!-- FIXME: This release date is NOT suitable for embargoed theses!!! -->
+    <field csv_header_name="item/curriculum/thesis/release/release_date">X.upload_date</field>
+    <!-- FIXME: Other file attributes? -->
+    <field csv_header_name="item/attachments/attachment/file">I.attachment</field>
   </xsl:variable>
   <xsl:variable name="fields" select="document('')/*/xsl:variable[@name='fieldArray']/*" />
  
@@ -88,7 +93,7 @@
       </xsl:for-each>
  
       <!-- Output constant fields -->
-      <xsl:value-of select="concat($field_delim, $quote, '/xml/item/embargoed', $quote)" />
+      <xsl:value-of select="concat($field_delim, $quote, 'item/xxxx/embargoed', $quote)" />
 
       <!-- Output newline -->
       <xsl:text>&#xa;</xsl:text>

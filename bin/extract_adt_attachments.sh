@@ -28,6 +28,8 @@ ADT_PARENT_DIR_COMMON=/opt/adt/html
 ##############################################################################
 [ x$1 = x ] && {
   echo "Usage:  $app  ADT_FILE_PATH.html [DEST_DIR]" >&2
+  echo "   ADT_FILE_PATH.html is the file path to the ADT HTML source file" >&2
+  echo "     (or /dev/null to avoid extracting attachments)" >&2
   echo "   DEST_DIR is the destination directory for attachments" >&2
   echo "   Eg:  $app  /opt/adt/html/public/adt-SFUyyyymmdd.hhmmdd/index.html" >&2
   exit 1

@@ -49,7 +49,6 @@
     <field csv_header_name="item/curriculum/thesis/title">DC.Title</field>
 
     <!-- FIXME: Single comma separated field? -->
-    <!-- FIXME: ADT does not have any library-selected disciplines to populate item/curriculum/thesis/subjects/subject -->
     <field csv_header_name="item/curriculum/thesis/keywords/keyword">DC.Subject</field>
     <field csv_header_name="item/curriculum/thesis/version/abstract/text">DC.Description.abstract</field>
     <field csv_header_name="item/curriculum/thesis/complete_year">DC.Date.valid</field>
@@ -60,10 +59,6 @@
     <!-- FIXME: What agreements should be completed at item/curriculum/thesis/agreements/* ?
     <field csv_header_name="item/rhd/statement/text">DC.Rights</field>
     -->
-    <!-- FIXME: What is XPath for previous ADT identifier?
-    <field csv_header_name="item/rhd/previous_identifier_url">DC.Identifier</field>
-    -->
-
     <!-- Use X.thesis_type which is derived from X.dtype & X.degree
     <field csv_header_name="item/rhd/dtype">X.dtype</field>
     <field csv_header_name="item/rhd/degree">X.degree</field>
@@ -77,6 +72,9 @@
     <field csv_header_name="item/curriculum/thesis/release/release_date">X.upload_date</field>
     <!-- FIXME: Other file attributes? -->
     <field csv_header_name="item/attachments/attachment/file">I.attachment</field>
+    <!-- FIXME: What is XPath for previous ADT identifier?  -->
+    <field csv_header_name="item/xxxx/previous_identifier_url">DC.Identifier.fixed</field>
+
   </xsl:variable>
   <xsl:variable name="fields" select="document('')/*/xsl:variable[@name='fieldArray']/*" />
  
@@ -93,6 +91,7 @@
       </xsl:for-each>
  
       <!-- Output constant fields -->
+      <xsl:value-of select="concat($field_delim, $quote, 'item/curriculum/thesis/subjects/subject', $quote)" />
       <xsl:value-of select="concat($field_delim, $quote, 'item/xxxx/embargoed', $quote)" />
 
       <!-- Output newline -->
@@ -126,6 +125,8 @@
     </xsl:for-each>
  
     <!-- Output constant fields -->
+    <!-- Field: item/curriculum/thesis/subjects/subject is empty -->
+    <xsl:value-of select="concat($field_delim, $quote, '', $quote)" />
     <xsl:value-of select="concat($field_delim, $quote, $embargoed_str, $quote)" />
 
     <!-- output newline -->

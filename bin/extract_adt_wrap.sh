@@ -133,6 +133,7 @@ for dir_name in adt-SFU????????.??????; do
 
   ### Only for non-embargo???
   find_adt_index_filename "$dir_name" "$dir_count"	# Returns fname_index
+  #fname_index=/dev/null 				# Avoid extracting attachments
   $EXTRACT_ATTACHMENTS_SCRIPT "$fname_index" "$dname_out" >> "$fname_out"
 
   fnames_out="$fnames_out $fname_out"

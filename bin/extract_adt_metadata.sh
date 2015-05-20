@@ -166,6 +166,20 @@ cat $fname |
   ' |
 
   awk -F\" '
+    # Insert DC.Identifier.fixed immediately after DC.Identifier.
+    # This repairs the DC.Identifier URI.
+    BEGIN {OFS="\""}
+    {print $0}
+    $2=="DC.Identifier" && $4=="URI" {
+      $2 = "DC.Identifier.fixed"
+      $6 = gensub("//(theses.flinders.edu.au\.?|catalogue.flinders.edu.au./local/adt)/uploads/", "//theses.flinders.edu.au/public/", "", $6)
+      $6 = gensub("/public/adt-ADT", "/public/adt-SFU", "", $6)
+      print $0
+    }
+
+  ' |
+
+  awk -F\" '
     # Insert X.thesis_type before the closing </BODY> tag.
     # X.thesis_type is derived from X.dtype (or X.degree if X.dtype is inconclusive)
     BEGIN {

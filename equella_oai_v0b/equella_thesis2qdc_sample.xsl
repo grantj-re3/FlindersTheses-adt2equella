@@ -29,7 +29,7 @@
   <xsl:variable name="target_url_prefix" select="'http://www.flinders.edu.au/theses/'" />
   <xsl:variable name="identifier_prefix" select="'flex-'" />
   <xsl:variable name="rights_statement" 
-    select="'This electronic version is made publicly available by Flinders University in accordance with its open access policy for student theses. Copyright in this thesis remains with the author. This thesis may incorporate third party material which has been used by the author pursuant to Fair Dealing exceptions. If you are the owner of any included third party copyright material and/or you believe that any material has been made available without permission of the copyright owner please contact copyright@flinders.edu.au with the details'"
+    select="'This electronic version is (or will be) made publicly available by Flinders University in accordance with its open access policy for student theses. Copyright in this thesis remains with the author. This thesis may incorporate third party material which has been used by the author pursuant to Fair Dealing exceptions. If you are the owner of any included third party copyright material and/or you believe that any material has been made available without permission of the copyright owner please contact copyright@flinders.edu.au with the details'"
   />
 
   <xsl:variable name="access_restrictions_note_marc506_a" 
@@ -186,7 +186,7 @@
 
   <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
   <!-- dcterms:accessRights (for MARC 506$a) -->
-  <!-- dcterms:available (as YYYY-MM for MARC 263$a as YYYYMM) -->
+  <!-- dcterms:available (for MARC 263$a as YYYYMM) -->
   <!-- - Only populate if release_date is in the future.
        - We need very strict control of release_date format!
   -->
@@ -217,7 +217,7 @@
       <dc:rights> <xsl:value-of select="concat('Note: ', $electronic_location_public_note_marc856_z)" /> </dc:rights>
       -->
       <dcterms:accessRights> <xsl:value-of select="$access_restrictions_note_marc506_a" /> </dcterms:accessRights>
-      <dcterms:available> <xsl:value-of select="substring(., 1, 7)" /> </dcterms:available>
+      <dcterms:available> <xsl:value-of select="concat(substring(., 1, 4), substring(., 6, 2))" /> </dcterms:available>
     </xsl:if>
   </xsl:template>
 

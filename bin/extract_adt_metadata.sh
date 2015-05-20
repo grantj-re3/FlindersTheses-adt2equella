@@ -78,7 +78,7 @@ cat $fname |
 
       # Subset of @names in /HTML/BODY/input fields
       md[0] = "chair"
-      #md[1] = "chair_email"
+      md[1] = "chair_email"
       md[2] = "dtype"
       md[3] = "degree"
       md[4] = "institution"
@@ -106,14 +106,14 @@ cat $fname |
 
     # Copy selected XPath /HTML/BODY/input elements to output.
     # All input-elements are on a single line.
-    /<input.*type=\"hidden\"/ && $4==md[0] {e=md[0]; print e > "/dev/stderr"; printf "  <META NAME=\"%s%s\" CONTENT=\"%s\" />\n",pref,e,$6}
-    #/<input.*type=\"hidden\"/ && $4==md[1] {e=md[1]; print e > "/dev/stderr"; printf "  <META NAME=\"%s%s\" CONTENT=\"%s\" />\n",pref,e,$6}
-    /<input.*type=\"hidden\"/ && $4==md[2] {e=md[2]; print e > "/dev/stderr"; printf "  <META NAME=\"%s%s\" CONTENT=\"%s\" />\n",pref,e,$6}
-    /<input.*type=\"hidden\"/ && $4==md[3] {e=md[3]; print e > "/dev/stderr"; printf "  <META NAME=\"%s%s\" CONTENT=\"%s\" />\n",pref,e,$6}
-    /<input.*type=\"hidden\"/ && $4==md[4] {e=md[4]; print e > "/dev/stderr"; printf "  <META NAME=\"%s%s\" CONTENT=\"%s\" />\n",pref,e,$6}
-    /<input.*type=\"hidden\"/ && $4==md[5] {e=md[5]; print e > "/dev/stderr"; printf "  <META NAME=\"%s%s\" CONTENT=\"%s\" />\n",pref,e,$6}
-    /<input.*type=\"hidden\"/ && $4==md[6] {e=md[6]; print e > "/dev/stderr"; printf "  <META NAME=\"%s%s\" CONTENT=\"%s\" />\n",pref,e,$6}
-    /<input.*type=\"hidden\"/ && $4==md[7] {e=md[7]; print e > "/dev/stderr"; printf "  <META NAME=\"%s%s\" CONTENT=\"%s\" />\n",pref,e,$6}
+    /<input.*type=\"hidden\"/ && $4==md[0] {print $4 > "/dev/stderr"; printf "  <META NAME=\"%s%s\" CONTENT=\"%s\" />\n",pref,$4,$6}
+    /<input.*type=\"hidden\"/ && $4==md[1] {print $4 > "/dev/stderr"; printf "  <META NAME=\"%s%s\" CONTENT=\"%s\" />\n",pref,$4,$6}
+    /<input.*type=\"hidden\"/ && $4==md[2] {print $4 > "/dev/stderr"; printf "  <META NAME=\"%s%s\" CONTENT=\"%s\" />\n",pref,$4,$6}
+    /<input.*type=\"hidden\"/ && $4==md[3] {print $4 > "/dev/stderr"; printf "  <META NAME=\"%s%s\" CONTENT=\"%s\" />\n",pref,$4,$6}
+    /<input.*type=\"hidden\"/ && $4==md[4] {print $4 > "/dev/stderr"; printf "  <META NAME=\"%s%s\" CONTENT=\"%s\" />\n",pref,$4,$6}
+    /<input.*type=\"hidden\"/ && $4==md[5] {print $4 > "/dev/stderr"; printf "  <META NAME=\"%s%s\" CONTENT=\"%s\" />\n",pref,$4,$6}
+    /<input.*type=\"hidden\"/ && $4==md[6] {print $4 > "/dev/stderr"; printf "  <META NAME=\"%s%s\" CONTENT=\"%s\" />\n",pref,$4,$6}
+    /<input.*type=\"hidden\"/ && $4==md[7] {print $4 > "/dev/stderr"; printf "  <META NAME=\"%s%s\" CONTENT=\"%s\" />\n",pref,$4,$6}
   ' |
 
   sed '

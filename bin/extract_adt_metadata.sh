@@ -166,17 +166,24 @@ cat $fname |
   ' |
 
   awk -F\" '
+    # Convert DC.Language to give name ("English") rather than RFC1766
+    # (ISO639-1) language code ("en"). We retain the xml attribute SCHEME=
+    # "RFC1766" here (although it is no longer true after the conversion).
+    BEGIN {OFS="\""}
+    !($2=="DC.Language" && $4=="RFC1766") {print $0}
+    $2=="DC.Language" && $4=="RFC1766" {
+      $6 = gensub("en", "English", "", $6)
+      print $0
+    }
+
     # Insert DC.Identifier.fixed immediately after DC.Identifier.
     # This repairs the DC.Identifier URI.
-    BEGIN {OFS="\""}
-    {print $0}
     $2=="DC.Identifier" && $4=="URI" {
       $2 = "DC.Identifier.fixed"
       $6 = gensub("//(theses.flinders.edu.au\.?|catalogue.flinders.edu.au./local/adt)/uploads/", "//theses.flinders.edu.au/public/", "", $6)
       $6 = gensub("/public/adt-ADT", "/public/adt-SFU", "", $6)
       print $0
     }
-
   ' |
 
   awk -F\" '

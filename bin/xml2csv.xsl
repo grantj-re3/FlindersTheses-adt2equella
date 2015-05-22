@@ -38,9 +38,14 @@
   <xsl:param name="embargoed_str" select="''"/>
 
   <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
-  <xsl:variable name="quote" select="'&quot;'" />
+  <!-- Field delim for CSV EBI file -->
   <xsl:variable name="field_delim" select="','" />
+  <!-- Quote fields so they may contain $field_delim -->
+  <xsl:variable name="quote" select="'&quot;'" />
+  <!-- This subfield generates multiple Equella fields -->
   <xsl:variable name="subfield_delim" select="'|'" />
+  <!-- Alternative subfield for DC.Subject - does not generate multiple Equella fields -->
+  <xsl:variable name="subfield_delim_alt" select="','" />
  
   <!-- An "array" containing the XML field-names (and their associated CSV header-names) -->
   <xsl:variable name="fieldArray">
@@ -48,7 +53,6 @@
     <field csv_header_name="item/curriculum/people/students/student/email">DC.Creator.personalName.address</field>
     <field csv_header_name="item/curriculum/thesis/title">DC.Title</field>
 
-    <!-- FIXME: Single comma separated field? -->
     <field csv_header_name="item/curriculum/thesis/keywords/keyword">DC.Subject</field>
     <field csv_header_name="item/curriculum/thesis/version/abstract/text">DC.Description.abstract</field>
     <field csv_header_name="item/curriculum/thesis/complete_year">DC.Date.valid</field>
@@ -114,9 +118,13 @@
       <xsl:value-of select="$quote"/>
 
       <!-- Permit repeated fields -->
-      <xsl:for-each select="$currNode/*[name()='HEAD' or name()='BODY' or name()='INDEX']/META[@NAME = current()]/@CONTENT">
+      <xsl:variable name="currName" select="current()" />
+      <xsl:for-each select="$currNode/*/META[@NAME = current()]/@CONTENT">
         <xsl:if test="position() != 1">
-          <xsl:value-of select="$subfield_delim"/>
+        <xsl:choose>
+          <xsl:when test="$currName = 'DC.Subject'"> <xsl:value-of select="$subfield_delim_alt"/> </xsl:when>
+          <xsl:otherwise> <xsl:value-of select="$subfield_delim"/> </xsl:otherwise>
+        </xsl:choose>
         </xsl:if>
         <xsl:value-of select="." />
       </xsl:for-each>

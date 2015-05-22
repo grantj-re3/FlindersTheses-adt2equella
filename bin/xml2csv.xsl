@@ -120,12 +120,14 @@
       <!-- Permit repeated fields -->
       <xsl:variable name="currName" select="current()" />
       <xsl:for-each select="$currNode/*/META[@NAME = current()]/@CONTENT">
+
         <xsl:if test="position() != 1">
-        <xsl:choose>
-          <xsl:when test="$currName = 'DC.Subject'"> <xsl:value-of select="$subfield_delim_alt"/> </xsl:when>
-          <xsl:otherwise> <xsl:value-of select="$subfield_delim"/> </xsl:otherwise>
-        </xsl:choose>
+          <xsl:choose>
+            <xsl:when test="$currName = 'DC.Subject'"> <xsl:value-of select="$subfield_delim_alt"/> </xsl:when>
+            <xsl:otherwise> <xsl:value-of select="$subfield_delim"/> </xsl:otherwise>
+          </xsl:choose>
         </xsl:if>
+
         <xsl:value-of select="." />
       </xsl:for-each>
 

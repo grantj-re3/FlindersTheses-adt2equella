@@ -71,13 +71,27 @@ find_adt_filename() {
 }
 
 ##############################################################################
-# def find_adt_index_filename(dir_name, dir_count) {
+# def get_adt_index_filepath(dir_name, dir_count) {
 ##############################################################################
-find_adt_index_filename() {
+get_adt_index_filepath() {
   dir_name="$1"
   dir_count="$2"
 
-  fname_index="$ADT_INDEX_PARENT_DIR_APPROVED/$dir_name/index.html"
+  target_path="$ADT_INDEX_PARENT_DIR_APPROVED/$dir_name/index.html"
+}
+
+##############################################################################
+# def get_adt_embargo_attachments_dir(dir_name, dir_count) {
+##############################################################################
+get_adt_embargo_attachments_dirpath() {
+  dir_name="$1"
+  dir_count="$2"
+
+  target_path1="$ADT_MD_PARENT_DIR_EMBARGO/$dir_name/restricted"
+  target_path2="$ADT_MD_PARENT_DIR_EMBARGO/$dir_name/public"
+  target_path="$target_path1"
+  [ ! -d $target_path ] && target_path="$target_path2"
+  [ ! -d $target_path ] && echo "WARNING: Neither directory exists: $target_path1 nor $target_path2"
 }
 
 ##############################################################################
@@ -97,6 +111,7 @@ else
   echo "Usage:  $APP  --approved|-a  |  --embargoed|-e" >&2
   exit 1
 fi
+opt_status="$1"
 
 ##############################################################################
 # Iterate through all ADT HTML files; convert to XML; validate XML
@@ -131,10 +146,13 @@ for dir_name in adt-SFU????????.??????; do
 
   $EXTRACT_METADATA_SCRIPT "$fname" > "$fname_out" 2>/dev/null
 
-  ### Only for non-embargo???
-  find_adt_index_filename "$dir_name" "$dir_count"	# Returns fname_index
-  #fname_index=/dev/null 				# Avoid extracting attachments
-  $EXTRACT_ATTACHMENTS_SCRIPT "$fname_index" "$dname_out" >> "$fname_out"
+  if [ $EMBARGOED_STR = 'false' ]; then
+    get_adt_index_filepath "$dir_name" "$dir_count"	# Returns target_path
+  else
+    get_adt_embargo_attachments_dirpath "$dir_name" "$dir_count" # Returns target_path
+  fi
+  #target_path=/dev/null 				# Avoid extracting attachments
+  $EXTRACT_ATTACHMENTS_SCRIPT "$opt_status" "$target_path" "$dname_out" >> "$fname_out"
 
   fnames_out="$fnames_out $fname_out"
   xmllint --noout "$fname_out"

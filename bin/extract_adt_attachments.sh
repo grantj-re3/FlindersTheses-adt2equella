@@ -26,34 +26,61 @@ app=`basename $0`
 ADT_PARENT_DIR_COMMON=/opt/adt/html
 
 ##############################################################################
-[ x$1 = x ] && {
-  echo "Usage:  $app  ADT_FILE_PATH.html [DEST_DIR]" >&2
-  echo "   ADT_FILE_PATH.html is the file path to the ADT HTML source file" >&2
+usage_exit() {
+  echo "Usage 1:  $app  --approved|-a  ADT_FILE_PATH.html  [DEST_DIR]" >&2
+  echo "Usage 2:  $app  --embargoed|-e  ADT_DIR_PATH  [DEST_DIR]" >&2
+  echo "   ADT_FILE_PATH.html is the file path to the ADT source index.html file" >&2
+  echo "     (or /dev/null to avoid extracting attachments)" >&2
+  echo "   ADT_DIR_PATH is the path to the ADT source attachment directory" >&2
   echo "     (or /dev/null to avoid extracting attachments)" >&2
   echo "   DEST_DIR is the destination directory for attachments" >&2
-  echo "   Eg:  $app  /opt/adt/html/public/adt-SFUyyyymmdd.hhmmdd/index.html" >&2
+  echo "   Eg1:  $app -a /opt/adt/html/public/adt-SFUyyyymmdd.hhmmdd/index.html" >&2
+  echo "   Eg2:  $app -e /opt/adt/html/uploads/delayed/adt-SFUyyyymmdd.hhmmdd/restricted" >&2
   exit 1
 }
 
-fname="$1"
-#fname="/opt/adt/html/public/adt-SFU20050603.095257/index.html"
+##############################################################################
+if [ "$1" = --approved -o "$1" = -a ]; then
+  EMBARGOED_STR=false
+elif [ "$1" = --embargoed -o "$1" = -e ]; then
+  EMBARGOED_STR=true
+else
+  usage_exit
+fi
+[ -z "$2" ] && usage_exit
 
+shift
 dname="$2"
 
 ##############################################################################
-if [ -f "$1" ]; then
-  attachments=`cat $fname |
-    egrep "<a href=" |
-    egrep -v "<IMG SRC=" |
-    sed "
-      s/^.*<a href=\"//
-      s~http://[^/]*~$ADT_PARENT_DIR_COMMON~
-      s/\">.*$//
-    "
-  `
+if [ $EMBARGOED_STR = 'false' ]; then
+  # Approved thesis
+  src_fname="$1"
+  if [ -f "$src_fname" ]; then
+    attachments=`cat $src_fname |
+      egrep "<a href=" |
+      egrep -v "<IMG SRC=" |
+      sed "
+        s/^.*<a href=\"//
+        s~http://[^/]*~$ADT_PARENT_DIR_COMMON~
+        s/\">.*$//
+      "
+    `
+  else
+    echo "WARNING: '$src_fname' not found (INDEX element will be empty)" >&2
+    attachments=""
+  fi
+
 else
-  echo "WARNING: '$fname' not found (INDEX element will be empty)" >&2
-  attachments=""
+  # Embargoed thesis
+  src_dname="$1"
+  if [ -d "$src_dname" ]; then
+    attachments=`ls -1d $src_dname/*`
+  else
+    echo "WARNING: '$src_dname' not found (INDEX element will be empty)" >&2
+    attachments=""
+  fi
+
 fi
 
 ##############################################################################

@@ -47,9 +47,9 @@ elif [ "$1" = --embargoed -o "$1" = -e ]; then
 else
   usage_exit
 fi
-[ -z "$2" ] && usage_exit
 
 shift
+[ -z "$1" ] && usage_exit
 dname="$2"
 
 ##############################################################################

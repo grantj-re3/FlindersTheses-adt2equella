@@ -34,14 +34,26 @@
 ##############################################################################
 app=`basename $0`
 
-
-[ x$1 = x ] && {
-  echo "Usage:  $app  ADT_FILE_PATH.html" >&2
-  echo "   Eg:  $app  /opt/adt/html/uploads/approved/adt-SFUyyyymmdd.hhmmdd/adt-SFUyyyymmdd.hhmmdd.html" >&2
-  echo "   Eg:  $app  /opt/adt/html/uploads/approved/adt-SFUyyyymmdd.hhmmdd/adt-ADTyyyymmdd.hhmmdd.html" >&2
+##############################################################################
+usage_exit() {
+  echo "Usage 1:  $app  --approved|-a   ADT_FILE_PATH.html" >&2
+  echo "Usage 2:  $app  --embargoed|-e  ADT_FILE_PATH.html" >&2
+  echo "     Eg:  $app  -a /opt/adt/html/uploads/approved/adt-SFUyyyymmdd.hhmmdd/adt-SFUyyyymmdd.hhmmdd.html" >&2
+  echo "     Eg:  $app  -a /opt/adt/html/uploads/approved/adt-SFUyyyymmdd.hhmmdd/adt-ADTyyyymmdd.hhmmdd.html" >&2
   exit 1
 }
 
+##############################################################################
+if [ "$1" = --approved -o "$1" = -a ]; then
+  EMBARGOED_STR=false
+elif [ "$1" = --embargoed -o "$1" = -e ]; then
+  EMBARGOED_STR=true
+else
+  usage_exit
+fi
+
+shift
+[ -z "$1" ] && usage_exit
 fname="$1"
 #fname="/opt/adt/html/uploads/approved/adt-SFU20050603.095257/adt-ADT20050603.095257.html"
 #fname="/opt/adt/html/uploads/approved/adt-SFU20060130.095828/adt-SFU20060130.095828.html"
@@ -165,7 +177,7 @@ cat $fname |
     s:| />:" />:g
   ' |
 
-  awk -F\" '
+  awk -F\" -v EMBARGOED_STR="$EMBARGOED_STR" '
     # Convert DC.Language to give name ("English") rather than RFC1766
     # (ISO639-1) language code ("en"). We retain the xml attribute SCHEME=
     # "RFC1766" here (although it is no longer true after the conversion).
@@ -180,8 +192,13 @@ cat $fname |
     # This repairs the DC.Identifier URI.
     $2=="DC.Identifier" && $4=="URI" {
       $2 = "DC.Identifier.fixed"
-      $6 = gensub("//(theses.flinders.edu.au\.?|catalogue.flinders.edu.au./local/adt)/uploads/", "//theses.flinders.edu.au/public/", "", $6)
-      $6 = gensub("/public/adt-ADT", "/public/adt-SFU", "", $6)
+      if(EMBARGOED_STR == "true") {
+        $6 = gensub("//theses.flinders.edu.au\.?/uploads/(.*)$", "//theses.flinders.edu.au/uploads/delayed/\\1/catalog-\\1.html", "", $6)
+      }
+      else {
+        $6 = gensub("//(theses.flinders.edu.au\.?|catalogue.flinders.edu.au./local/adt)/uploads/", "//theses.flinders.edu.au/public/", "", $6)
+        $6 = gensub("/public/adt-ADT", "/public/adt-SFU", "", $6)
+      }
       print $0
     }
   ' |

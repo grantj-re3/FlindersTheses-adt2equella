@@ -44,7 +44,7 @@ ADT_MD_PARENT_DIR_EMBARGO="$ADT_PARENT_DIR_COMMON/uploads/delayed"
 ADT_INDEX_PARENT_DIR_APPROVED="$ADT_PARENT_DIR_COMMON/public"
 
 # Limit the number of records to be processed by this script
-RECORDS_MAX=99999	# At 27/03/2015 there are 477 dirs (4x html metadata files missing)
+RECORDS_MAX=99999		# At 27/03/2015 there are 477 dirs (4x html metadata files missing)
 
 ##############################################################################
 # def find_adt_filename(dir_name, dir_count)
@@ -129,10 +129,13 @@ for dir_name in adt-SFU????????.??????; do
 
   #[ $dir_count -le  300 ] && continue	# DEBUG - SKIP
 
-  [ $dir_count -eq  83 ] && continue	# MANUALLY FIX: 2x junk char ("?" in black diamond)
-  [ $dir_count -eq 129 ] && continue	# MANUALLY FIX: spelling errors in sentences 3 & 4 are due to illegal chars
-  [ $dir_count -eq 136 ] && continue	# MANUALLY FIX: 2x Illegal char; KS??? gene
-  [ $dir_count -eq 225 ] && continue	# MANUALLY FIX: 5x di???usion, 1x ???xed
+  if [ $EMBARGOED_STR = false ]; then
+    [ $dir_count -eq   1 ] && continue	# 2 copies of this thesis; omit this copy
+    [ $dir_count -eq  83 ] && continue	# MANUALLY FIX: 2x junk char ("?" in black diamond)
+    [ $dir_count -eq 129 ] && continue	# MANUALLY FIX: spelling errors in sentences 3 & 4 are due to illegal chars
+    [ $dir_count -eq 136 ] && continue	# MANUALLY FIX: 2x Illegal char; KS??? gene
+    [ $dir_count -eq 225 ] && continue	# MANUALLY FIX: 5x di???usion, 1x ???xed
+  fi
 
   find_adt_filename "$dir_name" "$dir_count"		# Returns fname
   [ -z "$fname" ] && continue				# Skip if no HTML metadata file in dir
@@ -144,7 +147,9 @@ for dir_name in adt-SFU????????.??????; do
   dname_out="$OUT_DIR/$basename_out.d"
   echo "[$dir_count] Processing $fname; writing to $fname_out"
 
-  $EXTRACT_METADATA_SCRIPT "$fname" > "$fname_out" 2>/dev/null
+  cmd_metadata="$EXTRACT_METADATA_SCRIPT \"$opt_status\" \"$fname\" > \"$fname_out\" 2>/dev/null"
+  #echo "CMD 1: $cmd_metadata"
+  eval $cmd_metadata
 
   if [ $EMBARGOED_STR = 'false' ]; then
     get_adt_index_filepath "$dir_name" "$dir_count"	# Returns target_path
@@ -152,7 +157,9 @@ for dir_name in adt-SFU????????.??????; do
     get_adt_embargo_attachments_dirpath "$dir_name" "$dir_count" # Returns target_path
   fi
   #target_path=/dev/null 				# Avoid extracting attachments
-  $EXTRACT_ATTACHMENTS_SCRIPT "$opt_status" "$target_path" "$dname_out" >> "$fname_out"
+  cmd_attach="$EXTRACT_ATTACHMENTS_SCRIPT \"$opt_status\" \"$target_path\" \"$dname_out\" >> \"$fname_out\""
+  #echo "CMD 2: $cmd_attach"
+  eval $cmd_attach
 
   fnames_out="$fnames_out $fname_out"
   xmllint --noout "$fname_out"

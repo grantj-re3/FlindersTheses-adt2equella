@@ -192,12 +192,14 @@ cat $fname |
     # This repairs the DC.Identifier URI.
     $2=="DC.Identifier" && $4=="URI" {
       $2 = "DC.Identifier.fixed"
-      if(EMBARGOED_STR == "true") {
-        $6 = gensub("//theses.flinders.edu.au\.?/uploads/(.*)$", "//theses.flinders.edu.au/uploads/delayed/\\1/catalog-\\1.html", "", $6)
-      }
-      else {
+      if(EMBARGOED_STR == "false") {
+        # Public
         $6 = gensub("//(theses.flinders.edu.au\.?|catalogue.flinders.edu.au./local/adt)/uploads/", "//theses.flinders.edu.au/public/", "", $6)
         $6 = gensub("/public/adt-ADT", "/public/adt-SFU", "", $6)
+      }
+      else {
+        # Embargoed
+        $6 = gensub("//theses.flinders.edu.au\.?/uploads/(.*)$", "//theses.flinders.edu.au/uploads/delayed/\\1/catalog-\\1.html", "", $6)
       }
       print $0
     }

@@ -35,6 +35,7 @@
          xsltproc \-\-param add_csv_header "false()" \-\-stringparam embargoed_str true ...
   -->
   <xsl:param name="add_csv_header" select="true()" />
+  <!-- Other scripts compare embargoed_str with 'false'. Do the same below. -->
   <xsl:param name="embargoed_str" select="''"/>
 
   <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
@@ -96,7 +97,18 @@
  
       <!-- Output constant fields -->
       <xsl:value-of select="concat($field_delim, $quote, 'item/curriculum/thesis/subjects/subject', $quote)" />
-      <xsl:value-of select="concat($field_delim, $quote, 'item/xxxx/embargoed', $quote)" />
+      <xsl:value-of select="concat($field_delim, $quote, 'item/curriculum/thesis/version/thesis_version', $quote)" />
+      <xsl:value-of select="concat($field_delim, $quote, 'item/curriculum/thesis/agreements/authenticity', $quote)" />
+      <xsl:value-of select="concat($field_delim, $quote, 'item/curriculum/thesis/agreements/declaration', $quote)" />
+      <xsl:value-of select="concat($field_delim, $quote, 'item/curriculum/thesis/agreements/copyright', $quote)" />
+
+      <xsl:value-of select="concat($field_delim, $quote, 'item/curriculum/thesis/release/status', $quote)" />
+      <xsl:if test="$embargoed_str != 'false'">
+        <!-- Only add this column for embargoed theses. Hence all embargoed
+             theses in one CSV file and all non-embargoed theses in another.
+        -->
+        <xsl:value-of select="concat($field_delim, $quote, 'item/curriculum/thesis/agreements/embargo', $quote)" />
+      </xsl:if>
 
       <!-- Output newline -->
       <xsl:text>&#xa;</xsl:text>
@@ -135,9 +147,30 @@
     </xsl:for-each>
  
     <!-- Output constant fields -->
-    <!-- Field: item/curriculum/thesis/subjects/subject is empty -->
+
+    <!-- Field: item/curriculum/thesis/subjects/subject -->
     <xsl:value-of select="concat($field_delim, $quote, '', $quote)" />
-    <xsl:value-of select="concat($field_delim, $quote, $embargoed_str, $quote)" />
+    <!-- Field: item/curriculum/thesis/version/thesis_version -->
+    <xsl:value-of select="concat($field_delim, $quote, '2015 lib import version', $quote)" />
+    <!-- Field: item/curriculum/thesis/agreements/authenticity -->
+    <xsl:value-of select="concat($field_delim, $quote, 'I agree', $quote)" />
+    <!-- Field: item/curriculum/thesis/agreements/declaration -->
+    <xsl:value-of select="concat($field_delim, $quote, 'Yes', $quote)" />
+    <!-- Field: item/curriculum/thesis/agreements/copyright -->
+    <xsl:value-of select="concat($field_delim, $quote, 'Yes', $quote)" />
+
+    <xsl:choose>
+      <xsl:when test="$embargoed_str != 'false'">
+        <!-- Field: item/curriculum/thesis/release/status -->
+        <xsl:value-of select="concat($field_delim, $quote, 'Restricted Access', $quote)" />
+        <!-- Field: item/curriculum/thesis/agreements/embargo -->
+        <xsl:value-of select="concat($field_delim, $quote, 'Yes', $quote)" />
+      </xsl:when>
+      <xsl:otherwise>
+        <!-- Field: item/curriculum/thesis/release/status -->
+        <xsl:value-of select="concat($field_delim, $quote, 'Open Access', $quote)" />
+      </xsl:otherwise>
+    </xsl:choose>
 
     <!-- output newline -->
     <xsl:text>&#xa;</xsl:text>

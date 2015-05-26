@@ -50,7 +50,6 @@
  
   <!-- An "array" containing the XML field-names (and their associated CSV header-names) -->
   <xsl:variable name="fieldArray">
-    <field csv_header_name="item/curriculum/people/students/student/name_display">DC.Creator.personalName</field>
     <field csv_header_name="item/curriculum/people/students/student/email">DC.Creator.personalName.address</field>
     <field csv_header_name="item/curriculum/thesis/title">DC.Title</field>
 
@@ -60,13 +59,6 @@
     <field csv_header_name="item/curriculum/thesis/language">DC.Language</field>
     <!-- FIXME: I think DC.Publisher is derived from X.institution & X.school; use the components?
     <field csv_header_name="item/curriculum/thesis/publisher">DC.Publisher</field>
-    -->
-    <!-- FIXME: What agreements should be completed at item/curriculum/thesis/agreements/* ?
-    <field csv_header_name="item/rhd/statement/text">DC.Rights</field>
-    -->
-    <!-- Use X.thesis_type which is derived from X.dtype & X.degree
-    <field csv_header_name="item/rhd/dtype">X.dtype</field>
-    <field csv_header_name="item/rhd/degree">X.degree</field>
     -->
     <field csv_header_name="item/curriculum/thesis/@type">X.thesis_type</field>
     <field csv_header_name="item/curriculum/thesis/publisher">X.institution</field>
@@ -84,6 +76,42 @@
   <xsl:variable name="fields" select="document('')/*/xsl:variable[@name='fieldArray']/*" />
  
   <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
+  <!-- TEMPLATE-BASED FUNCTIONS - can only return text or element-sequences -->
+  <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
+
+  <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
+  <xsl:template name="do_student_name">
+    <xsl:param name="is_csv_header" select="false()" />
+
+    <xsl:choose>
+      <xsl:when test="$is_csv_header">
+        <xsl:value-of select="concat($field_delim, $quote, 'item/curriculum/people/students/student/lastname', $quote)" />
+        <xsl:value-of select="concat($field_delim, $quote, 'item/curriculum/people/students/student/firstname', $quote)" />
+        <xsl:value-of select="concat($field_delim, $quote, 'item/curriculum/people/students/student/lastname_display', $quote)" />
+        <xsl:value-of select="concat($field_delim, $quote, 'item/curriculum/people/students/student/firstname_display', $quote)" />
+        <xsl:value-of select="concat($field_delim, $quote, 'item/curriculum/people/students/student/name_display', $quote)" />
+      </xsl:when>
+
+      <xsl:otherwise>
+        <xsl:variable name="full_name" select="/ADT_METADATA/HEAD/META[@NAME='DC.Creator.personalName']/@CONTENT" />
+        <xsl:variable name="surname" select="normalize-space(substring-before($full_name, ','))" />
+        <xsl:variable name="given_names" select="normalize-space(substring-after($full_name, ','))" />
+        <xsl:variable name="surname_given_names" select="concat($given_names, ' ', $surname)" />
+
+        <xsl:value-of select="concat($field_delim, $quote, $surname, $quote)" />
+        <xsl:value-of select="concat($field_delim, $quote, $given_names, $quote)" />
+        <xsl:value-of select="concat($field_delim, $quote, $surname, $quote)" />
+        <xsl:value-of select="concat($field_delim, $quote, $given_names, $quote)" />
+        <xsl:value-of select="concat($field_delim, $quote, $surname_given_names, $quote)" />
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+
+  <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
+  <!-- TEMPLATES -->
+  <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
+
+  <!-- Root template -->
   <xsl:template match="/">
  
     <xsl:if test="$add_csv_header = true()">
@@ -95,6 +123,11 @@
         <xsl:value-of select="concat($quote, @csv_header_name, $quote)" />
       </xsl:for-each>
  
+      <!-- Output processed fields -->
+      <xsl:call-template name="do_student_name">
+        <xsl:with-param name="is_csv_header" select="true()" />
+      </xsl:call-template>
+
       <!-- Output constant fields -->
       <xsl:value-of select="concat($field_delim, $quote, 'item/curriculum/thesis/subjects/subject', $quote)" />
       <xsl:value-of select="concat($field_delim, $quote, 'item/curriculum/thesis/version/thesis_version', $quote)" />
@@ -146,6 +179,12 @@
       <xsl:value-of select="$quote"/>
     </xsl:for-each>
  
+    <!-- Output processed fields -->
+
+    <xsl:call-template name="do_student_name">
+      <xsl:with-param name="is_csv_header" select="false()" />
+    </xsl:call-template>
+
     <!-- Output constant fields -->
 
     <!-- Field: item/curriculum/thesis/subjects/subject -->

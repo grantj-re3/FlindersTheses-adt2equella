@@ -203,6 +203,16 @@ cat $fname |
       }
       print $0
     }
+
+    # Insert DC.Date.fixed immediately after DC.Date.valid.
+    # This repairs & converts DC.Date.valid values
+    $2=="DC.Date.valid" {
+      $2 = "DC.Date.fixed"
+      $6 = gensub("^.*[\/ \.\-]([0-9]+)$", "\\1", "", $6)	# Strip leading day or month
+      $6 = gensub("^([0-9][0-9])$", "20\\1", "", $6)		# Convert YY to YYYY
+      $6 = gensub("^(.*)$", "\\1-01-01", "", $6)		# Convert YYYY to YYYY-MM-DD
+      print $0
+    }
   ' |
 
   awk -F\" '

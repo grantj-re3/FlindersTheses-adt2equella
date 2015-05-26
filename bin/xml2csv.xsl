@@ -55,7 +55,7 @@
 
     <field csv_header_name="item/curriculum/thesis/keywords/keyword">DC.Subject</field>
     <field csv_header_name="item/curriculum/thesis/version/abstract/text">DC.Description.abstract</field>
-    <field csv_header_name="item/curriculum/thesis/complete_year">DC.Date.valid</field>
+    <field csv_header_name="item/curriculum/thesis/complete_year">DC.Date.fixed</field>
     <field csv_header_name="item/curriculum/thesis/language">DC.Language</field>
     <!-- FIXME: I think DC.Publisher is derived from X.institution & X.school; use the components?
     <field csv_header_name="item/curriculum/thesis/publisher">DC.Publisher</field>

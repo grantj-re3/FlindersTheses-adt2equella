@@ -5,7 +5,7 @@
 - Equella prerequisite: Create an OAI-PMH data provider for Qualified Dublin Core, QDC (or Dublin Core, DC)
 - Alma prerequisite: Create a top level collection and sub-collection
 - Alma prerequisite: [Create normalization rules](#normalization-rules)
-- Alma prerequisite: [Create a normalization rule process)[#create-a-normalization-rule-process]
+- Alma prerequisite: [Create a normalization rule process](#create-a-normalization-rule-process)
 
 ## Steps
 - Resource Management > Resource Configuration > Configuration Menu > Record Import > Import Profiles

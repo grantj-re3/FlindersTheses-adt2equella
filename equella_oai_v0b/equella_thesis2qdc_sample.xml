@@ -5,9 +5,14 @@
     <curriculum>
       <people>
         <students>
-          <student id="xxxx0000">
+          <student id="00001111">
             <name_display>Joe Bloggs</name_display>
             <email>joe.bloggs@example.com</email>
+            <fan>xxxx0000</fan>
+            <firstname>Joe</firstname>
+            <lasttname>Bloggs</lasttname>
+            <firstname_display>Joe</firstname_display>
+            <lastname_display>Bloggs</lastname_display>
           </student>
         </students>
         <coords>

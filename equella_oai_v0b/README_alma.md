@@ -2,9 +2,10 @@
 
 
 ## Create an Import Profile for a Digital profile-type
-- Prerequisite: In Equella, create an OAI-PMH data provider for Qualified Dublin Core, QDC (or Dublin Core, DC)
-- Prerequisite: Create a top level collection and sub-collection
-- Optional: [Create a normalization rule for subject-discipline](#create-a-normalization-rule-for-subject-discipline)
+- Equella prerequisite: Create an OAI-PMH data provider for Qualified Dublin Core, QDC (or Dublin Core, DC)
+- Alma prerequisite: Create a top level collection and sub-collection
+- Alma prerequisite: [Create normalization rules](#normalization-rules)
+- Alma prerequisite: [Create a normalization rule process)[#create-a-normalization-rule-process]
 
 ## Steps
 - Resource Management > Resource Configuration > Configuration Menu > Record Import > Import Profiles
@@ -43,6 +44,27 @@
   * Library: Main Library
   * IE Entity Type: [Generic Resource]
   * Click Save
+
+
+## Create a normalization rule process
+
+Steps:
+
+- Resource Management > Resource Configuration > Configuration Menu > Cataloging > Metadata Configuration
+- Profile: MARC21 Bibliographic > Normalization Processes tab
+- Click "Add Process"
+  * General Information tab
+    - Profile name
+    - Profile description
+    - Status: Active
+  * Task List tab
+    - Select one or more processes from the Process List Pool section. Click "Add To Selection"
+    - You can add more than one instance of the same process (eg. MarcDroolNormalization) to the Processes Selected section.
+    - In the Processes Selected section, move processes as required (using up/down arrows)
+  * Task Parameters tab
+    - For each Marc Drool Normalization entry, select a normalization rule via the Drools File Key list.
+  * Click Save
+
 
 ## Normalization rules
 

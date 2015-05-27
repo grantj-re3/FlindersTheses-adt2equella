@@ -80,7 +80,7 @@
   <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
 
   <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
-  <xsl:template name="do_student_name">
+  <xsl:template name="do_student_name_id">
     <xsl:param name="is_csv_header" select="false()" />
 
     <xsl:choose>
@@ -90,6 +90,7 @@
         <xsl:value-of select="concat($field_delim, $quote, 'item/curriculum/people/students/student/lastname_display', $quote)" />
         <xsl:value-of select="concat($field_delim, $quote, 'item/curriculum/people/students/student/firstname_display', $quote)" />
         <xsl:value-of select="concat($field_delim, $quote, 'item/curriculum/people/students/student/name_display', $quote)" />
+        <xsl:value-of select="concat($field_delim, $quote, 'item/curriculum/people/students/student/@id', $quote)" />
       </xsl:when>
 
       <xsl:otherwise>
@@ -97,12 +98,20 @@
         <xsl:variable name="surname" select="normalize-space(substring-before($full_name, ','))" />
         <xsl:variable name="given_names" select="normalize-space(substring-after($full_name, ','))" />
         <xsl:variable name="surname_given_names" select="concat($given_names, ' ', $surname)" />
+        <xsl:variable name="student_id">
+          <xsl:choose>
+            <xsl:when test="$embargoed_str = 'false'">StuIdAdtAppr</xsl:when>
+            <xsl:otherwise>StuIdAdtEmbg</xsl:otherwise>
+          </xsl:choose>
+        </xsl:variable>
 
         <xsl:value-of select="concat($field_delim, $quote, $surname, $quote)" />
         <xsl:value-of select="concat($field_delim, $quote, $given_names, $quote)" />
         <xsl:value-of select="concat($field_delim, $quote, $surname, $quote)" />
         <xsl:value-of select="concat($field_delim, $quote, $given_names, $quote)" />
         <xsl:value-of select="concat($field_delim, $quote, $surname_given_names, $quote)" />
+        <xsl:value-of select="concat($field_delim, $quote, $student_id, $quote)" />
+
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
@@ -124,13 +133,14 @@
       </xsl:for-each>
  
       <!-- Output processed fields -->
-      <xsl:call-template name="do_student_name">
+      <xsl:call-template name="do_student_name_id">
         <xsl:with-param name="is_csv_header" select="true()" />
       </xsl:call-template>
 
       <!-- Output constant fields -->
       <xsl:value-of select="concat($field_delim, $quote, 'item/curriculum/thesis/subjects/subject', $quote)" />
       <xsl:value-of select="concat($field_delim, $quote, 'item/curriculum/thesis/version/thesis_version', $quote)" />
+
       <xsl:value-of select="concat($field_delim, $quote, 'item/curriculum/thesis/agreements/authenticity', $quote)" />
       <xsl:value-of select="concat($field_delim, $quote, 'item/curriculum/thesis/agreements/declaration', $quote)" />
       <xsl:value-of select="concat($field_delim, $quote, 'item/curriculum/thesis/agreements/copyright', $quote)" />
@@ -181,7 +191,7 @@
  
     <!-- Output processed fields -->
 
-    <xsl:call-template name="do_student_name">
+    <xsl:call-template name="do_student_name_id">
       <xsl:with-param name="is_csv_header" select="false()" />
     </xsl:call-template>
 

@@ -130,3 +130,16 @@ rule "Equella thesis - move 307.a to 263.a"
 end
 ```
 
+### Normalization rule to fix 655 indicators
+
+```
+rule "Equella thesis - fix 655 indicators"
+  when
+    exists "024.a.flex-*"
+  then
+    changeFirstIndicator  "655" to " " if (exists "655.a")
+    changeSecondIndicator "655" to "4" if (exists "655.a")
+    removeSubField "655.2" if (exists "655.a")
+end
+```
+

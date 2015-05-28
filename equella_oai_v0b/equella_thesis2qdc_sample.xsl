@@ -144,7 +144,7 @@
       <xsl:when test="$is_live and $will_be_open_access">
         <xsl:apply-templates select="/xml/item/@id" />
         <xsl:apply-templates select="/xml/item/curriculum/thesis/@type" />
-        <xsl:apply-templates select="/xml/item/curriculum/people/students/student/name_display" />
+        <xsl:apply-templates select="/xml/item/curriculum/people/students/student" />
 
         <xsl:apply-templates select="/xml/item/curriculum/thesis/version/abstract/text" />
         <xsl:apply-templates select="/xml/item/curriculum/thesis/*[name()!='release']" />
@@ -225,8 +225,10 @@
   <!-- Tranform element to a different element name in the dc namespace -->
 
   <!-- dc:creator -->
-  <xsl:template match="student/name_display">
-    <dc:creator> <xsl:value-of select="." /> </dc:creator>
+  <xsl:template match="students/student">
+    <dc:creator>
+      <xsl:value-of select="concat(lastname_display, ', ', firstname_display)" />
+    </dc:creator>
   </xsl:template>
 
   <!-- dc:date -->

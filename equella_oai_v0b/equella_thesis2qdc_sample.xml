@@ -9,8 +9,8 @@
             <name_display>Joe Bloggs</name_display>
             <email>joe.bloggs@example.com</email>
             <fan>xxxx0000</fan>
-            <firstname>Joe</firstname>
-            <lasttname>Bloggs</lasttname>
+            <firstname>proxy_firstname</firstname>
+            <lasttname>proxy_lastname</lasttname>
             <firstname_display>Joe</firstname_display>
             <lastname_display>Bloggs</lastname_display>
           </student>

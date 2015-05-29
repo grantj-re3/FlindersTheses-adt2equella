@@ -136,7 +136,7 @@ end
 ### Normalization rule for target URL
 
 ```
-rule "Equella thesis - move 024.a to 856.u if 024.a is a hyperlink"
+rule "Equella thesis - move 024.a to 856.u if 024.a is a hyperlink (after 263.a rule)"
   when
     exists "024.a.flex-*"
   then
@@ -145,7 +145,7 @@ rule "Equella thesis - move 024.a to 856.u if 024.a is a hyperlink"
     changeSubField "856.a" to "u"
     changeFirstIndicator "856" to "4"
     changeSecondIndicator "856" to "1"
-    addSubField "856.z.My electronic location - public note (Norm Rule in Alma)."
+    addSubField "856.z.This item is under embargo. See repository record for release date information." if (exists "263.a")
 end
 ```
 

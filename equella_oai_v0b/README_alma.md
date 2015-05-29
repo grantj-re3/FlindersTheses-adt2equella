@@ -3,7 +3,7 @@
 
 ## Create an Import Profile for a Digital profile-type
 - Equella prerequisite: Create an OAI-PMH data provider for Qualified Dublin Core, QDC (or Dublin Core, DC)
-- Alma prerequisite: Create a top level collection and sub-collection
+- Alma prerequisite: [Create a top level collection and sub-collection](#create-a-top-level-collection-and-sub-collection)
 - Alma prerequisite: [Create normalization rules](#normalization-rules)
 - Alma prerequisite: [Create a normalization rule process](#create-a-normalization-rule-process)
 
@@ -23,7 +23,7 @@
   * Click "Open test page" to verify first record
   * Click Next
 - Part 2
-  * Correct the data using: Select the normalization rule set
+  * Correct the data using: Select the normalization rule process (as per the prerequisite)
   * Handle invalid data using: [MarcXML Bib Import]
   * Click Next
 - Part 3
@@ -40,13 +40,43 @@
   * Click Next
 - Part 5
   * Status: [Active]
-  * Collection assignment: Select a top level collection or sub-collection
+  * Collection assignment: Electronic thesis collection (created as per the prerequisite)
   * Library: Main Library
   * IE Entity Type: [Generic Resource]
   * Click Save
 
 
+## Create a top level collection and sub-collection
+
+Create a top level collection:
+
+- Resource Management > Create Inventory > Add Top Level Collection
+  * Collection Title: Thesis collection
+  * Description: Thesis collection
+  * Collection Name: Thesis collection
+  * External Id: -
+  * External System: -
+  * Library: Main Library
+  * Click "Save and continue" to create a sub-collection now or click "Save" to create a sub-collection later
+
+Create a sub-collection:
+
+- If you did not click "Save and continue" above, navigate to:
+  Resource Management > Search and Sets > Top Level Collections.
+  For the "Thesis collection" created above, click on "Edit Collection".
+- In the Sub-collections tab, click Add Sub-collection.
+  * Collection Title: Electronic thesis collection
+  * Description: Electronic thesis collection
+  * Collection Name: Electronic thesis collection
+  * External Id: -
+  * External System: -
+  * Library: Main Library (will inherit from the parent collection)
+  * Click "Save and continue"
+
+
 ## Create a normalization rule process
+
+These steps allow you to apply an ordered-set of normalization rules as a single job.
 
 Steps:
 

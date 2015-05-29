@@ -11,13 +11,14 @@
 - Resource Management > Resource Configuration > Configuration Menu > Record Import > Import Profiles
 - Add New Profile > Digital > Next
 - Part 1
-  * Profile name
-  * Profile description
+  * Profile name: Electronic Thesis Collection
+  * Profile description: Load QDC XML records from Equella OAI
   * Digital remote repository instance: Equella OAI Qualified DC Format
   * Import Protocol: OAI
   * Status: [Active]
   * OAI base URL: https://example.com/oai; Click "Connect and Edit"
-  * Metadata Prefix: Select XXXX
+  * Authentication: [Not checked]
+  * Metadata Prefix: Select oai_qdc_rhd
   * Set: Select XXXX
   * Harvest start date: Select earlier date if required
   * Click "Open test page" to verify first record
@@ -56,7 +57,7 @@ Create a top level collection:
   * Collection Name: Thesis collection
   * External Id: -
   * External System: -
-  * Library: Main Library
+  * Library: Special Collections
   * Click "Save and continue" to create a sub-collection now or click "Save" to create a sub-collection later
 
 Create a sub-collection:
@@ -70,7 +71,7 @@ Create a sub-collection:
   * Collection Name: Electronic thesis collection
   * External Id: -
   * External System: -
-  * Library: Main Library (will inherit from the parent collection)
+  * Library: Special Collections (will inherit from the parent collection)
   * Click "Save and continue"
 
 
@@ -83,17 +84,19 @@ Steps:
 - Resource Management > Resource Configuration > Configuration Menu > Cataloging > Metadata Configuration
 - Profile: MARC21 Bibliographic > Normalization Processes tab
 - Click "Add Process"
-  * General Information tab
-    - Profile name
-    - Profile description
+  * [General Information tab]
+    - Profile name: Electronic Thesis Collection normalization
+    - Profile description: Normalize Electronic Thesis Collection imported from Equella QDC OAI
     - Status: Active
-  * Task List tab
+    - Click Next
+  * [Task List tab]
     - Select one or more processes from the Process List Pool section. Click "Add To Selection"
     - You can add more than one instance of the same process (eg. MarcDroolNormalization) to the Processes Selected section.
     - In the Processes Selected section, move processes as required (using up/down arrows)
-  * Task Parameters tab
+    - Click Next
+  * [Task Parameters tab]
     - For each Marc Drool Normalization entry, select a normalization rule via the Drools File Key list.
-  * Click Save
+    - Click Save
 
 
 ## Normalization rules
@@ -136,7 +139,7 @@ end
 ### Normalization rule for target URL
 
 ```
-rule "Equella thesis - move 024.a to 856.u if 024.a is a hyperlink (after 263.a rule)"
+rule "Equella thesis - move 024.a to 856.u if 024.a is a hyperlink"
   when
     exists "024.a.flex-*"
   then

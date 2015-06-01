@@ -10,24 +10,24 @@
 ## Steps
 - Resource Management > Resource Configuration > Configuration Menu > Record Import > Import Profiles
 - Add New Profile > Digital > Next
-- Part 1
+- Part 1 [Profile Details]
   * Profile name: Electronic Thesis Collection
   * Profile description: Load QDC XML records from Equella OAI
   * Digital remote repository instance: Equella OAI Qualified DC Format
   * Import Protocol: OAI
   * Status: [Active]
   * OAI base URL: https://example.com/oai; Click "Connect and Edit"
-  * Authentication: [Not checked]
+  * Authentication: [Uncheck]
   * Metadata Prefix: Select oai_qdc_rhd
   * Set: Select XXXX
   * Harvest start date: Select earlier date if required
   * Click "Open test page" to verify first record
   * Click Next
-- Part 2
+- Part 2 [Normalization & Validation]
   * Correct the data using: Select the normalization rule process (as per the prerequisite)
   * Handle invalid data using: [MarcXML Bib Import]
   * Click Next
-- Part 3
+- Part 3 [Match Profile]
   * Serial match method: 035 (Other System Identifier) Match Method
   * Non Serial match method: 035 (Other System Identifier) Match Method
   * Handling method: [Automatic]
@@ -36,10 +36,12 @@
   * ...
   * Upon no match: [Import]
   * Click Next
-- Part 4
-  * Leave defaults
+- Part 4 [Set Management Tags]
+  * Suppress record/s from publish/delivery: [Uncheck]
+  * Synchronize with OCLC: [Don't publish]
+  * Synchronize with Libraries Australia: Publish Bibliographic records
   * Click Next
-- Part 5
+- Part 5 [Inventory Information]
   * Status: [Active]
   * Collection assignment: Electronic thesis collection (created as per the prerequisite)
   * Library: Main Library
@@ -84,17 +86,17 @@ Steps:
 - Resource Management > Resource Configuration > Configuration Menu > Cataloging > Metadata Configuration
 - Profile: MARC21 Bibliographic > Normalization Processes tab
 - Click "Add Process"
-  * [General Information tab]
+  * Part 1 [General Information tab]
     - Profile name: Electronic Thesis Collection normalization
     - Profile description: Normalize Electronic Thesis Collection imported from Equella QDC OAI
     - Status: Active
     - Click Next
-  * [Task List tab]
+  * Part 2 [Task List tab]
     - Select one or more processes from the Process List Pool section. Click "Add To Selection"
     - You can add more than one instance of the same process (eg. MarcDroolNormalization) to the Processes Selected section.
     - In the Processes Selected section, move processes as required (using up/down arrows)
     - Click Next
-  * [Task Parameters tab]
+  * Part 3 [Task Parameters tab]
     - For each Marc Drool Normalization entry, select a normalization rule via the Drools File Key list.
     - Click Save
 

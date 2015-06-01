@@ -130,7 +130,9 @@ for dir_name in adt-SFU????????.??????; do
   #[ $dir_count -le  300 ] && continue	# DEBUG - SKIP
 
   if [ $EMBARGOED_STR = false ]; then
+    # Do NOT skip dir_count 1 for the test record at test/adt/html/...
     [ $dir_count -eq   1 ] && continue	# 2 copies of this thesis; omit this copy
+
     [ $dir_count -eq  83 ] && continue	# MANUALLY FIX: 2x junk char ("?" in black diamond)
     [ $dir_count -eq 129 ] && continue	# MANUALLY FIX: spelling errors in sentences 3 & 4 are due to illegal chars
     [ $dir_count -eq 136 ] && continue	# MANUALLY FIX: 2x Illegal char; KS??? gene

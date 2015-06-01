@@ -102,13 +102,15 @@ for attachment in $attachments; do
       # Make other destination filenames more meaningful
       if echo "$attachment_dest" |egrep -q "^01front\.pdf$"; then
         attachment_dest="thesis-01abstract.pdf"
+        meta_name="I.attachment_abstract"
       else
         attachment_dest="thesis-$attachment_dest"
+        meta_name="I.attachment"
       fi
 
       # Path to dest file relative to XML/CSV files
       attachment_dest_rel="`basename $dname`/$attachment_dest"
-      echo "  <META NAME=\"I.attachment\" CONTENT=\"$attachment_dest_rel\" />"
+      echo "  <META NAME=\"$meta_name\" CONTENT=\"$attachment_dest_rel\" />"
 
       echo "Copying $attachment to dir $attachment_dest_rel" >&2
       [ ! -d "$dname" ] && mkdir -p "$dname"

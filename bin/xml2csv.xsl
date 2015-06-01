@@ -117,6 +117,44 @@
   </xsl:template>
 
   <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
+  <xsl:template name="do_attachment_info">
+    <xsl:param name="is_csv_header" select="false()" />
+
+    <xsl:choose>
+      <xsl:when test="$is_csv_header">
+        <xsl:value-of select="concat($field_delim, $quote, 'item/curriculum/thesis/version/open_access/files/uuid', $quote)" />
+        <xsl:value-of select="concat($field_delim, $quote, 'item/curriculum/thesis/version/examined_thesis/files/uuid', $quote)" />
+        <xsl:value-of select="concat($field_delim, $quote, 'item/curriculum/thesis/version/abstract/uuid', $quote)" />
+        <xsl:value-of select="concat($field_delim, $quote, 'item/curriculum/thesis/version/open_access/required', $quote)" />
+      </xsl:when>
+
+      <xsl:otherwise>
+
+        <!-- FIXME: Do any of these fields change for $embargoed_str ? -->
+        <xsl:variable name="thesis_files">
+
+          <!-- Permit repeated fields -->
+          <xsl:for-each select="/ADT_METADATA/INDEX/META[@NAME='I.attachment']/@CONTENT">
+            <xsl:if test="position() != 1">
+              <xsl:value-of select="$subfield_delim"/>
+            </xsl:if>
+            <xsl:value-of select="." />
+          </xsl:for-each>
+
+        </xsl:variable>
+        <xsl:variable name="abstract_file" select="/ADT_METADATA/INDEX/META[@NAME='I.attachment_abstract']/@CONTENT" />
+        <xsl:variable name="open_access_req" select="'version of record'" />
+
+        <xsl:value-of select="concat($field_delim, $quote, $thesis_files, $quote)" />
+        <xsl:value-of select="concat($field_delim, $quote, $thesis_files, $quote)" />
+        <xsl:value-of select="concat($field_delim, $quote, $abstract_file, $quote)" />
+        <xsl:value-of select="concat($field_delim, $quote, $open_access_req, $quote)" />
+
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+
+  <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
   <!-- TEMPLATES -->
   <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
 
@@ -133,7 +171,12 @@
       </xsl:for-each>
  
       <!-- Output processed fields -->
+
       <xsl:call-template name="do_student_name_id">
+        <xsl:with-param name="is_csv_header" select="true()" />
+      </xsl:call-template>
+
+      <xsl:call-template name="do_attachment_info">
         <xsl:with-param name="is_csv_header" select="true()" />
       </xsl:call-template>
 
@@ -192,6 +235,10 @@
     <!-- Output processed fields -->
 
     <xsl:call-template name="do_student_name_id">
+      <xsl:with-param name="is_csv_header" select="false()" />
+    </xsl:call-template>
+
+    <xsl:call-template name="do_attachment_info">
       <xsl:with-param name="is_csv_header" select="false()" />
     </xsl:call-template>
 

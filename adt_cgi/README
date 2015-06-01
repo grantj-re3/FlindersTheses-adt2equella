@@ -1,0 +1,6 @@
+
+CGI scripts to replace the ADT etd.cgi script.
+
+- etd_fusa_outage.cgi   -- outage notification
+- etd_fusa_redirect.cgi -- URL redirection
+

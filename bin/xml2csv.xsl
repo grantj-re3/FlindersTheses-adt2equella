@@ -100,8 +100,8 @@
         <xsl:variable name="surname_given_names" select="concat($given_names, ' ', $surname)" />
         <xsl:variable name="student_id">
           <xsl:choose>
-            <xsl:when test="$embargoed_str = 'false'">StuIdAdtAppr</xsl:when>
-            <xsl:otherwise>StuIdAdtEmbg</xsl:otherwise>
+            <xsl:when test="$embargoed_str = 'false'">FakeIdAdtAppr</xsl:when>
+            <xsl:otherwise>FakeIdAdtEmbg</xsl:otherwise>
           </xsl:choose>
         </xsl:variable>
 
@@ -122,7 +122,6 @@
 
     <xsl:choose>
       <xsl:when test="$is_csv_header">
-        <xsl:value-of select="concat($field_delim, $quote, 'item/curriculum/thesis/version/open_access/files/uuid', $quote)" />
         <xsl:value-of select="concat($field_delim, $quote, 'item/curriculum/thesis/version/examined_thesis/files/uuid', $quote)" />
         <xsl:value-of select="concat($field_delim, $quote, 'item/curriculum/thesis/version/abstract/uuid', $quote)" />
         <xsl:value-of select="concat($field_delim, $quote, 'item/curriculum/thesis/version/open_access/required', $quote)" />
@@ -145,7 +144,6 @@
         <xsl:variable name="abstract_file" select="/ADT_METADATA/INDEX/META[@NAME='I.attachment_abstract']/@CONTENT" />
         <xsl:variable name="open_access_req" select="'version of record'" />
 
-        <xsl:value-of select="concat($field_delim, $quote, $thesis_files, $quote)" />
         <xsl:value-of select="concat($field_delim, $quote, $thesis_files, $quote)" />
         <xsl:value-of select="concat($field_delim, $quote, $abstract_file, $quote)" />
         <xsl:value-of select="concat($field_delim, $quote, $open_access_req, $quote)" />

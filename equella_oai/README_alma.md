@@ -6,11 +6,12 @@
 - Alma prerequisite: [Create a top level collection and sub-collection](#create-a-top-level-collection-and-sub-collection)
 - Alma prerequisite: [Create normalization rules](#normalization-rules)
 - Alma prerequisite: [Create a normalization rule process](#create-a-normalization-rule-process)
+- Alma prerequisite: [Modify the linking parameter](#modify-the-linking-parameter)
 
 ## Steps
 - Resource Management > Resource Configuration > Configuration Menu > Record Import > Import Profiles
 - Add New Profile > Digital > Next
-- Part 1 [Profile Details]
+- Part 1 - Profile Details
   * Profile name: Electronic Thesis Collection
   * Profile description: Load QDC XML records from Equella OAI
   * Digital remote repository instance: Equella OAI Qualified DC Format
@@ -23,11 +24,11 @@
   * Harvest start date: Select earlier date if required
   * Click "Open test page" to verify first record
   * Click Next
-- Part 2 [Normalization & Validation]
+- Part 2 - Normalization & Validation
   * Correct the data using: Select the normalization rule process (as per the prerequisite)
   * Handle invalid data using: [MarcXML Bib Import]
   * Click Next
-- Part 3 [Match Profile]
+- Part 3 - Match Profile
   * Serial match method: 035 (Other System Identifier) Match Method
   * Non Serial match method: 035 (Other System Identifier) Match Method
   * Handling method: [Automatic]
@@ -36,12 +37,12 @@
   * ...
   * Upon no match: [Import]
   * Click Next
-- Part 4 [Set Management Tags]
+- Part 4 - Set Management Tags
   * Suppress record/s from publish/delivery: [Uncheck]
   * Synchronize with OCLC: [Don't publish]
   * Synchronize with Libraries Australia: Publish Bibliographic records
   * Click Next
-- Part 5 [Inventory Information]
+- Part 5 - Inventory Information
   * Status: [Active]
   * Collection assignment: Electronic thesis collection (created as per the prerequisite)
   * Library: Main Library
@@ -75,30 +76,6 @@ Create a sub-collection:
   * External System: -
   * Library: Special Collections (will inherit from the parent collection)
   * Click "Save and continue"
-
-
-## Create a normalization rule process
-
-These steps allow you to apply an ordered-set of normalization rules as a single job.
-
-Steps:
-
-- Resource Management > Resource Configuration > Configuration Menu > Cataloging > Metadata Configuration
-- Profile: MARC21 Bibliographic > Normalization Processes tab
-- Click "Add Process"
-  * Part 1 [General Information tab]
-    - Profile name: Electronic Thesis Collection normalization
-    - Profile description: Normalize Electronic Thesis Collection imported from Equella QDC OAI
-    - Status: Active
-    - Click Next
-  * Part 2 [Task List tab]
-    - Select one or more processes from the Process List Pool section. Click "Add To Selection"
-    - You can add more than one instance of the same process (eg. MarcDroolNormalization) to the Processes Selected section.
-    - In the Processes Selected section, move processes as required (using up/down arrows)
-    - Click Next
-  * Part 3 [Task Parameters tab]
-    - For each Marc Drool Normalization entry, select a normalization rule via the Drools File Key list.
-    - Click Save
 
 
 ## Normalization rules
@@ -176,4 +153,42 @@ rule "Equella thesis - fix 655 indicators"
     removeSubField "655.2" if (exists "655.a")
 end
 ```
+
+
+## Create a normalization rule process
+
+These steps allow you to apply an ordered-set of normalization rules as a single job.
+
+Steps:
+
+- Resource Management > Resource Configuration > Configuration Menu > Cataloging > Metadata Configuration
+- Profile: MARC21 Bibliographic > Normalization Processes tab
+- Click "Add Process"
+  * Part 1 - General Information tab
+    - Profile name: Electronic Thesis Collection normalization
+    - Profile description: Normalize Electronic Thesis Collection imported from Equella QDC OAI
+    - Status: Active
+    - Click Next
+  * Part 2 - Task List tab
+    - Select one or more processes from the Process List Pool section. Click "Add To Selection"
+    - You can add more than one instance of the same process (eg. MarcDroolNormalization) to the Processes Selected section.
+    - In the Processes Selected section, move processes as required (using up/down arrows)
+    - Click Next
+  * Part 3 - Task Parameters tab
+    - For each Marc Drool Normalization entry, select a normalization rule via the Drools File Key list.
+    - Click Save
+
+
+## Modify the linking parameter
+
+Allow Primo to link through to URLs in Equella
+
+- Resource Management > Resource Configuration > Configuration Menu > Record Import > Remote Digital Repositories
+- For Remote Repository Name "Equella OAI Qualified DC format", click Action > Edit
+- Part 2 - Transformer Rules tab
+  * Verify that Target Field "LinkingParameter1" is mapped to Source Field "header:identifier"
+- Part 3 - Delivery tab
+  * Repository Name: Equella Repository
+  * Object Template: http://www.flinders.edu.au/theses/$$LinkingParameter1
+  * Thumbnail Template: -
 

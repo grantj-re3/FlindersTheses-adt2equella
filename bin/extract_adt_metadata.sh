@@ -33,6 +33,9 @@
 #
 ##############################################################################
 app=`basename $0`
+app_dir_temp=`dirname "$0"`		# Might be relative (eg "." or "..") or absolute
+root_dir=`cd "$app_dir_temp/.." ; pwd`	# Absolute dir (one level above app dir)
+
 
 ##############################################################################
 usage_exit() {
@@ -211,6 +214,116 @@ cat $fname |
       $6 = gensub("^.*[\/ \.\-]([0-9]+)$", "\\1", "", $6)	# Strip leading day or month
       $6 = gensub("^([0-9][0-9])$", "20\\1", "", $6)		# Convert YY to YYYY
       $6 = gensub("^(.*)$", "\\1-01-01", "", $6)		# Convert YYYY to YYYY-MM-DD
+      print $0
+    }
+  ' |
+
+  awk -F\" -v root_dir="$root_dir" '
+    # Insert X.school.fixed before the closing </BODY> tag.
+    BEGIN {
+      OFS="\""
+      fname_sch_conf = root_dir "/etc/schools_now_xmlfields.csv"
+      fname_debug    = root_dir "/debug_schools.log"
+
+      # Read school records with format "FacultyName","SchoolKey","SchoolName". Eg.
+      # "Faculty of Science and Engineering","BS","School of Biological Sciences"
+      # SchoolCodes = BUS,IS,PSY,SAPS. LAW,EDU,HACA. BS,CAPS,CSEM,ENV. HS,MED,NM.
+      i = 0			# Line number
+      while (getline < fname_sch_conf) {
+        split($0, col, "\"")
+        key = col[4]
+        ref_fac[key] = col[2]
+        ref_sch[key] = col[6]
+
+        i++
+        keys_sorted[i] = key
+      }
+      for(i=1; i<=length(keys_sorted); i++) {
+        key = keys_sorted[i]
+        printf(" %2d %-6s %-60s %-60s\n", i, key, ref_sch[key], ref_fac[key]) > fname_debug
+      }
+    }
+
+    $2=="X.school"   {sch = $4}
+    $2=="X.dept"     {fac = $4}
+    $2=="X.dir_name" {dir = $4}
+    !/<\/BODY>/ {print $0}
+
+    /<\/BODY>/ {
+      key = ""
+      sch_lc = tolower(sch)
+
+      # FIXME: Use regex to map to current school
+      # Map to current school:
+      #  American studies
+      #  Archaeology
+      #  Australian Studies
+      #  Biotechnology
+      #  Centre for Development Studies
+      #  Department of Physiology
+      #  Earth Sciences
+      #  EHLT / EHL
+      #  Flinders Institute of Public Policy and Management
+      #  French
+      #  Geography, Population and Environmental Management
+      #  Health Sciences
+      #  History
+      #  Medical Biotechnology
+      #  Nationa[l] Institute of Labour Studies
+      #  Politics and Public Policy
+      #  Public Health
+      #  School of Cultural Tourism
+      #  School of Social and Policy Studies
+      #  social work and social policy
+      #  SOCPES
+      #  Womens Studies
+      #  Yunggorendi First Nations Centre
+      #  
+      #  [20061010.104925] SCH:Education,Theology, Law, Humanities [FAC:Archaeology] -- check
+      #  [20090810.180637.xml] SCH:""
+      #  [20100602.095058] SCH:""
+      #  [20101214.163513] SCH:""
+      #  [20110825.112517] SCH:Humanites, Law and Theology -- check
+
+      if(sch_lc ~ /business/) 
+        key = "BUS"
+      else if(sch_lc ~ /international.* stud/) 
+        key = "IS"
+      else if(sch_lc ~ /psychology/) 
+        key = "PSY"
+      else if(sch_lc ~ /sociology/) 
+        key = "SAPS"
+
+      else if(sch_lc ~ /(^|[^a-z])(law)($|[^a-z])/) 
+        key = "LAW"
+      else if(sch_lc ~ /education/) 
+        key = "EDU"
+      else if(sch_lc ~ /humanit[i]?es|screen.* (stud|media)|creative.* writing|english|drama|theology/) 
+        key = "HACA"
+
+      else if(sch_lc ~ /biolog/) 
+        key = "BS"
+      else if(sch_lc ~ /chem.* physic|chemistry/) 
+        key = "CAPS"
+      else if(sch_lc ~ /engin[e]+ring/) 
+        key = "CSEM"
+      else if(sch_lc ~ /environment/) 
+        key = "ENV"
+
+      #else if(sch_lc ~ /medicine/ || dir == "adt-SFU20090810.180637") 
+      else if(sch_lc ~ /medicine|medical *school/) 
+        key = "MED"
+      else if(sch_lc ~ /nursing/) 
+        key = "NM"
+
+      if(key == "")
+        val = sch
+      else
+        val = "[[" key "]] " ref_sch[key] " (" ref_fac[key] ")"
+      end
+
+      #val = "GJ: " sch " (" fac ")"
+      printf "  <META NAME=\"X.school.fixed\" CONTENT=\"%s\" />\n", val
       print $0
     }
   ' |

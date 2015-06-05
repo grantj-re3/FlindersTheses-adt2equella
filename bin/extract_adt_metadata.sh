@@ -220,6 +220,7 @@ cat $fname |
 
   awk -F\" -v root_dir="$root_dir" '
     # Insert X.school.fixed before the closing </BODY> tag.
+    # Map to current school.
     BEGIN {
       OFS="\""
       fname_sch_conf = root_dir "/etc/schools_now_xmlfields.csv"
@@ -254,64 +255,63 @@ cat $fname |
       sch_lc = tolower(sch)
 
       # FIXME: Use regex to map to current school
-      # Map to current school:
-      #  American studies
-      #  Archaeology
-      #  Australian Studies
-      #  Biotechnology
-      #  Centre for Development Studies
-      #  Department of Physiology
-      #  Earth Sciences
-      #  EHLT / EHL
-      #  Flinders Institute of Public Policy and Management
-      #  French
-      #  Geography, Population and Environmental Management
-      #  Health Sciences
-      #  History
-      #  Medical Biotechnology
-      #  Nationa[l] Institute of Labour Studies
-      #  Politics and Public Policy
-      #  Public Health
-      #  School of Cultural Tourism
-      #  School of Social and Policy Studies
-      #  social work and social policy
-      #  SOCPES
-      #  Womens Studies
-      #  Yunggorendi First Nations Centre
       #  
-      #  [20061010.104925] SCH:Education,Theology, Law, Humanities [FAC:Archaeology] -- check
-      #  [20090810.180637.xml] SCH:""
-      #  [20100602.095058] SCH:""
-      #  [20101214.163513] SCH:""
+      #  [20060612.211358] SCH:SOCPES
       #  [20110825.112517] SCH:Humanites, Law and Theology -- check
+      #  
+      # Fixed:
+      # c adt-SFU20060227.150043 = haca (theology)
+      #   adt-SFU20061010.104925 = haca (archaeology)
+      #   adt-SFU20070130.192707 = csem
+      # c adt-SFU20080115.222927 = csem
+      # c adt-SFU20080430.132508 = caps (physics)
+      # c adt-SFU20090810.180637 = med (Biotechnology, Faculty of Health Sciences)
+      # c adt-SFU20100602.095058 = haca (archaeology)
+      #   adt-SFU20101214.163513 = caps (School of Chemistry, Physics and Earth Sciences)
+      # c adt-SFU20130410.021018 = bs (biological science)
+      # c adt-SFU20141013.091753 = haca (archaeology)
+      # c adt-SFU20141027.102258 = csem
+      #   
 
-      if(sch_lc ~ /business/) 
+      # Before faculties, perform overrides here (which would otherwise be
+      # caught by an inadequate rule below)
+      if(dir ~ "adt-SFU20061010.104925")
+        key = "HACA"
+
+      # Faculty of Social and Behavioural Sciences
+      else if(sch_lc ~ /business/) 
         key = "BUS"
-      else if(sch_lc ~ /international.* stud/) 
+      else if(sch_lc ~ /(international|development|american).* stud|history/) 
         key = "IS"
       else if(sch_lc ~ /psychology/) 
         key = "PSY"
-      else if(sch_lc ~ /sociology/) 
+      else if(sch_lc ~ /sociology|public.* policy.* management|women[^ ]*s.* stud|politics.* public.* policy|social.* policy.* stud|social.* work.* social.* policy/) 
         key = "SAPS"
+      else if(sch_lc ~ /nationa.* institute.* labour.* stud/) 
+        key = "NILS"
 
+      # Faculty of Education, Humanities and Law
       else if(sch_lc ~ /(^|[^a-z])(law)($|[^a-z])/) 
         key = "LAW"
       else if(sch_lc ~ /education/) 
         key = "EDU"
-      else if(sch_lc ~ /humanit[i]?es|screen.* (stud|media)|creative.* writing|english|drama|theology/) 
+      else if(sch_lc ~ /humanit[i]?es|screen.* (stud|media)|creative.* writing|english|drama|theology|australian.* stud|yunggorendi *first *nations *centre|tourism|archaeology|french/ || dir ~ "adt-SFU20060227.150043|adt-SFU20100602.095058|adt-SFU20141013.091753")
         key = "HACA"
 
-      else if(sch_lc ~ /biolog/) 
+      # Faculty of Science and Engineering
+      else if(sch_lc ~ /biolog/ || dir ~ "adt-SFU20130410.021018") 
         key = "BS"
-      else if(sch_lc ~ /chem.* physic|chemistry/) 
+      else if(sch_lc ~ /chem.* physic|chemistry/ || dir ~ "adt-SFU20080430.132508|adt-SFU20101214.163513") 
         key = "CAPS"
-      else if(sch_lc ~ /engin[e]+ring/) 
+      else if(sch_lc ~ /informatics.* engin[e]+ring|computer.*(science)?.* engineering.* math/ || dir ~ "adt-SFU20070130.192707|adt-SFU20080115.222927|adt-SFU20141027.102258") 
         key = "CSEM"
-      else if(sch_lc ~ /environment/) 
+      else if(sch_lc ~ /environment|geography|earth.* science/) 
         key = "ENV"
 
-      #else if(sch_lc ~ /medicine/ || dir == "adt-SFU20090810.180637") 
-      else if(sch_lc ~ /medicine|medical *school/) 
+      # Faculty of Medicine, Nursing and Health Sciences
+      else if(sch_lc ~ /public.* health|health *science/) 
+        key = "HS"
+      else if(sch_lc ~ /medicine|medical *school|biotechnology|physiology/ || dir == "adt-SFU20090810.180637") 
         key = "MED"
       else if(sch_lc ~ /nursing/) 
         key = "NM"

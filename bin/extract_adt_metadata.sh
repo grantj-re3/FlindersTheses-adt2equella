@@ -254,28 +254,28 @@ cat $fname |
       key = ""
       sch_lc = tolower(sch)
 
-      # FIXME: Use regex to map to current school
-      #  
-      #  [20060612.211358] SCH:SOCPES
-      #  [20110825.112517] SCH:Humanites, Law and Theology -- check
-      #  
+      # Use regex to map to current school
+      #
       # Fixed:
       # c adt-SFU20060227.150043 = haca (theology)
-      #   adt-SFU20061010.104925 = haca (archaeology)
-      #   adt-SFU20070130.192707 = csem
+      # c adt-SFU20060612.211358 = env
+      # c adt-SFU20061010.104925 = haca (archaeology)
+      # c adt-SFU20070130.192707 = csem
       # c adt-SFU20080115.222927 = csem
       # c adt-SFU20080430.132508 = caps (physics)
       # c adt-SFU20090810.180637 = med (Biotechnology, Faculty of Health Sciences)
       # c adt-SFU20100602.095058 = haca (archaeology)
-      #   adt-SFU20101214.163513 = caps (School of Chemistry, Physics and Earth Sciences)
+      # c adt-SFU20101214.163513 = caps (School of Chemistry, Physics and Earth Sciences)
+      # c adt-SFU20110825.112517 = edu
       # c adt-SFU20130410.021018 = bs (biological science)
       # c adt-SFU20141013.091753 = haca (archaeology)
       # c adt-SFU20141027.102258 = csem
-      #   
 
       # Before faculties, perform overrides here (which would otherwise be
       # caught by an inadequate rule below)
-      if(dir ~ "adt-SFU20061010.104925")
+      if(dir ~ "adt-SFU20110825.112517")
+        key = "EDU"
+      else if(dir ~ "adt-SFU20061010.104925")
         key = "HACA"
 
       # Faculty of Social and Behavioural Sciences
@@ -305,7 +305,7 @@ cat $fname |
         key = "CAPS"
       else if(sch_lc ~ /informatics.* engin[e]+ring|computer.*(science)?.* engineering.* math/ || dir ~ "adt-SFU20070130.192707|adt-SFU20080115.222927|adt-SFU20141027.102258") 
         key = "CSEM"
-      else if(sch_lc ~ /environment|geography|earth.* science/) 
+      else if(sch_lc ~ /environment|geography|earth.* science/ || dir ~ "adt-SFU20060612.211358") 
         key = "ENV"
 
       # Faculty of Medicine, Nursing and Health Sciences

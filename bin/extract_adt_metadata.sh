@@ -66,12 +66,16 @@ fname="$1"
   exit 2
 }
 
-# Extract "yyyy-mm-dd" from filename "adt-SFUyyyymmdd.HHMMSS.html"
-upload_date=`basename "$fname" |
+# Extract "yyyymmdd.HHMMSS" from filename "adt-SFUyyyymmdd.HHMMSS.html"
+ref_no=`basename "$fname" |
   sed '
     s/^adt-\(SFU\|ADT\)//
-    s/\.[0-9]\{6\}\.html$//
-    s/^\([0-9]\{4\}\)\([0-9]\{2\}\)\([0-9]\{2\}\)$/\1-\2-\3/
+    s/\.html$//
+  '`
+# Extract "yyyy-mm-dd" from ref_no "yyyymmdd.HHMMSS"
+upload_date=`basename "$ref_no" |
+  sed '
+    s/^\([0-9]\{4\}\)\([0-9]\{2\}\)\([0-9]\{2\}\)\.[0-9]\{6\}$/\1-\2-\3/
   '`
 
 cat $fname |
@@ -84,7 +88,7 @@ cat $fname |
     s:" *> *$:" />:
   ' |
 
-  awk -F\" -v upload_date="$upload_date" '
+  awk -F\" -v upload_date="$upload_date" -v ref_no="$ref_no" '
     BEGIN {
       # The ADT char encoding is ISO-8859-1/WINDOWS-1250, but
       # this script will convert to UTF-8 (using iconv)
@@ -104,8 +108,10 @@ cat $fname |
 
     # Close the XML doc
     END {
-      # Make upload date available (perhaps assume approx the publish date)
+      # Make upload date available (perhaps it is approx the publish date)
       printf "  <META NAME=\"%s%s\" CONTENT=\"%s\" />\n", pref, "upload_date", upload_date
+      # Make ref_no (ADT Thesis key) available
+      printf "  <META NAME=\"%s%s\" CONTENT=\"%s\" />\n", pref, "ref_no", ref_no
       printf "</BODY>\n"
     }
 
@@ -219,7 +225,7 @@ cat $fname |
   ' |
 
   awk -F\" -v root_dir="$root_dir" '
-    # Insert X.school.fixed before the closing </BODY> tag.
+    # Insert X.school.interim_now15 before the closing </BODY> tag.
     # Map to current school.
     BEGIN {
       OFS="\""
@@ -323,7 +329,7 @@ cat $fname |
       end
 
       #val = "GJ: " sch " (" fac ")"
-      printf "  <META NAME=\"X.school.fixed\" CONTENT=\"%s\" />\n", val
+      printf "  <META NAME=\"X.school.interim_now15\" CONTENT=\"%s\" />\n", val
       print $0
     }
   ' |

@@ -137,6 +137,7 @@ for dir_name in adt-SFU????????.??????; do
     [ $dir_count -eq 129 ] && continue	# MANUALLY FIX: spelling errors in sentences 3 & 4 are due to illegal chars
     [ $dir_count -eq 136 ] && continue	# MANUALLY FIX: 2x Illegal char; KS??? gene
     [ $dir_count -eq 225 ] && continue	# MANUALLY FIX: 5x di???usion, 1x ???xed
+    [ $dir_count -eq 238 ] && continue	# MANUALLY FIX: Cannot convert thesis CSV from UTF8 to WINDOWS-1250 for review
   fi
 
   find_adt_filename "$dir_name" "$dir_count"		# Returns fname

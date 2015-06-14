@@ -34,7 +34,10 @@
          xsltproc \-\-param add_csv_header "true()"  \-\-stringparam embargoed_str false ...
          xsltproc \-\-param add_csv_header "false()" \-\-stringparam embargoed_str true ...
   -->
+  <!-- true()=First line will be a CSV header; false()=First line will be data -->
   <xsl:param name="add_csv_header" select="true()" />
+  <!-- true()=Use @csv_header_name for CSV header; false()=Use value (eg. DC.Title)-->
+  <xsl:param name="use_array_csv_header_name" select="true()" />
   <!-- Other scripts compare embargoed_str with 'false'. Do the same below. -->
   <xsl:param name="embargoed_str" select="''"/>
 
@@ -50,27 +53,36 @@
  
   <!-- An "array" containing the XML field-names (and their associated CSV header-names) -->
   <xsl:variable name="fieldArray">
+    <field csv_header_name="fake.X.ref_no"                                >X.ref_no</field>
     <field csv_header_name="item/curriculum/people/students/student/email">DC.Creator.personalName.address</field>
-    <field csv_header_name="item/curriculum/thesis/title">DC.Title</field>
+    <field csv_header_name="item/curriculum/thesis/title"                 >DC.Title</field>
 
-    <field csv_header_name="item/curriculum/thesis/keywords/keyword">DC.Subject</field>
-    <field csv_header_name="item/curriculum/thesis/version/abstract/text">DC.Description.abstract</field>
-    <field csv_header_name="item/curriculum/thesis/complete_year">DC.Date.fixed</field>
-    <field csv_header_name="item/curriculum/thesis/language">DC.Language</field>
+    <field csv_header_name="item/curriculum/thesis/keywords/keyword"      >DC.Subject</field>
+    <field csv_header_name="item/curriculum/thesis/version/abstract/text" >DC.Description.abstract</field>
+    <field csv_header_name="item/curriculum/thesis/complete_year"         >DC.Date.fixed</field>
+    <field csv_header_name="item/curriculum/thesis/language"              >DC.Language</field>
     <!-- FIXME: I think DC.Publisher is derived from X.institution & X.school; use the components?
-    <field csv_header_name="item/curriculum/thesis/publisher">DC.Publisher</field>
+    <field csv_header_name="item/curriculum/thesis/publisher"             >DC.Publisher</field>
     -->
-    <field csv_header_name="item/curriculum/thesis/@type">X.thesis_type</field>
-    <field csv_header_name="item/curriculum/thesis/publisher">X.institution</field>
-    <field csv_header_name="item/curriculum/thesis/faculties/primary">X.dept</field>
-    <field csv_header_name="item/curriculum/thesis/schools/primary">X.school</field>
-    <field csv_header_name="item/curriculum/people/coords/coord/name">X.chair</field>
+    <field csv_header_name="item/curriculum/thesis/@type"                 >X.thesis_type</field>
+    <field csv_header_name="item/curriculum/thesis/publisher"             >X.institution</field>
+    <field csv_header_name="item/curriculum/thesis/faculties/primary"     >X.dept</field>
+    <field csv_header_name="item/curriculum/thesis/schools/primary"       >X.school</field>
+    <field csv_header_name="fake.X.school.interim_now15"                  >X.school.interim_now15</field>
+    <field csv_header_name="fake.X.chair_email"                           >X.chair_email</field>
+    <field csv_header_name="item/curriculum/people/coords/coord/name"     >X.chair</field>
     <!-- FIXME: This release date is NOT suitable for embargoed theses!!! -->
-    <field csv_header_name="item/curriculum/thesis/release/release_date">X.upload_date</field>
+    <field csv_header_name="item/curriculum/thesis/release/release_date"  >X.upload_date</field>
     <!-- FIXME: Other file attributes? -->
-    <field csv_header_name="item/attachments/attachment/file">I.attachment</field>
+<!--
+    <field csv_header_name="item/attachments/attachment/file"             >I.attachment</field>
+-->
+    <field csv_header_name="fake.I.attachment_abstract_clean0"            >I.attachment_abstract_clean0</field>
+    <field csv_header_name="fake.I.attachment_abstract_clean2"            >I.attachment_abstract_clean2</field>
+    <field csv_header_name="fake.I.attachment_clean0"                     >I.attachment_clean0</field>
+    <field csv_header_name="fake.I.attachment_clean2"                     >I.attachment_clean2</field>
     <!-- FIXME: What is XPath for previous ADT identifier?  -->
-    <field csv_header_name="item/xxxx/previous_identifier_url">DC.Identifier.fixed</field>
+    <field csv_header_name="item/xxxx/previous_identifier_url"            >DC.Identifier.fixed</field>
 
   </xsl:variable>
   <xsl:variable name="fields" select="document('')/*/xsl:variable[@name='fieldArray']/*" />
@@ -165,7 +177,11 @@
         <xsl:if test="position() != 1">
           <xsl:value-of select="$field_delim"/>
         </xsl:if>
-        <xsl:value-of select="concat($quote, @csv_header_name, $quote)" />
+
+        <xsl:choose>
+          <xsl:when test="$use_array_csv_header_name"> <xsl:value-of select="concat($quote, @csv_header_name, $quote)" /> </xsl:when>
+          <xsl:otherwise> <xsl:value-of select="concat($quote, ., $quote)" /> </xsl:otherwise>
+        </xsl:choose>
       </xsl:for-each>
  
       <!-- Output processed fields -->

@@ -68,6 +68,57 @@ get_xml_complete_year() {
 }
 
 ##############################################################################
+get_attachments_approved() {
+  src_fname="$1"
+
+  if [ -f "$src_fname" ]; then
+    attachments=`cat $src_fname |
+      egrep "<a href=" |
+      egrep -v "<IMG SRC=" |
+      sed "
+        s/^.*<a href=\"//
+        s~http://[^/]*~$ADT_PARENT_DIR_COMMON~
+        s/\">.*$//
+      "
+    `
+  else
+    # Would not expect to get here but... yet more cleanup needed
+    echo "WARNING: '$src_fname' not found; trying attachment folder" >&2
+
+    # Eg. /opt/adt/html/uploads/approved/adt-SFUdddddddd.tttttt/{public,restricted}
+    src_dname_parent=`echo "$src_fname" |
+      sed 's~/opt/adt/html/public/~/opt/adt/html/uploads/approved/~;  s~/index.html$~~'
+    `
+    src_dname1="$src_dname_parent/public"
+    src_dname2="$src_dname_parent/restricted"
+
+    if [ -d "$src_dname1" ]; then
+      src_dname="$src_dname1"
+      attachments=`ls -1d $src_dname/*`
+    elif [ -d "$src_dname2" ]; then
+      src_dname="$src_dname2"
+      attachments=`ls -1d $src_dname/*`
+    else
+      echo "WARNING: Neither '$src_dname1' nor '$src_dname2' folder found (INDEX element will be empty)" >&2
+      attachments=""
+    fi
+  fi
+}
+
+##############################################################################
+get_attachments_embargoed() {
+  src_dname="$1"
+  if [ -d "$src_dname" ]; then
+    attachments=`ls -1d $src_dname/*`
+  else
+    echo "WARNING: '$src_dname' not found (INDEX element will be empty)" >&2
+    attachments=""
+  fi
+}
+
+##############################################################################
+# Main()
+##############################################################################
 if [ "$1" = --approved -o "$1" = -a ]; then
   EMBARGOED_STR=false
 elif [ "$1" = --embargoed -o "$1" = -e ]; then
@@ -89,33 +140,9 @@ surname="$xml_field"
 
 ##############################################################################
 if [ $EMBARGOED_STR = 'false' ]; then
-  # Approved thesis
-  src_fname="$1"
-  if [ -f "$src_fname" ]; then
-    attachments=`cat $src_fname |
-      egrep "<a href=" |
-      egrep -v "<IMG SRC=" |
-      sed "
-        s/^.*<a href=\"//
-        s~http://[^/]*~$ADT_PARENT_DIR_COMMON~
-        s/\">.*$//
-      "
-    `
-  else
-    echo "WARNING: '$src_fname' not found (INDEX element will be empty)" >&2
-    attachments=""
-  fi
-
+  get_attachments_approved  "$1"	# Returns $attachments
 else
-  # Embargoed thesis
-  src_dname="$1"
-  if [ -d "$src_dname" ]; then
-    attachments=`ls -1d $src_dname/*`
-  else
-    echo "WARNING: '$src_dname' not found (INDEX element will be empty)" >&2
-    attachments=""
-  fi
-
+  get_attachments_embargoed "$1"	# Returns $attachments
 fi
 
 ##############################################################################
@@ -123,53 +150,64 @@ fi
 ##############################################################################
 echo "<INDEX>"
 
-for attachment in $attachments; do
-  if [ -f "$attachment" ]; then
-    # Attachment file exists
-
-    if [ ! -z "$dname" ]; then
-      # Replace destination "FILENAME.pdf.pdf" with "FILENAME.pdf"
-      attachment_base=`basename "$attachment"`
-      if echo "$attachment_base" |egrep -q "\.pdf\.pdf$"; then
-        attachment_base=`echo "$attachment_base" |sed 's/\.pdf\.pdf$/.pdf/'`
-      fi
-
-      # Make other destination filenames more meaningful
-      if echo "$attachment_base" |egrep -q "^01front\.pdf$"; then
-        meta_name="I.attachment_abstract"
-        attachment_dest="thesis-01abstract.pdf"
-        attachment_dest2="Abstract.pdf"
-      else
-        meta_name="I.attachment"
-        attachment_dest="thesis-$attachment_base"
-        if echo "$attachment_base" |egrep -q "^02"; then
-          ext=""				# Assume no file-extension
-          if echo "$attachment_base" |egrep -q "\."; then
-            ext=`echo "$attachment_base" |sed 's/^.*\.//'`
-          fi
-          attachment_dest2="Thesis-$surname-$complete_year.$ext"
-        else
-          attachment_dest2="Thesis-$surname-$complete_year-$attachment_base"
-        fi
-      fi
-
-      # Path to dest file relative to XML/CSV files
-      attachment_dest_rel="`basename $dname`/$attachment_dest"
-      attachment_dest_rel2="`basename $dname`/$attachment_dest2"
-      echo "  <META NAME=\"${meta_name}_clean0\" CONTENT=\"$attachment_base\" />"
-      echo "  <META NAME=\"${meta_name}_clean1\" CONTENT=\"$attachment_dest_rel\" />"
-      echo "  <META NAME=\"${meta_name}_clean2\" CONTENT=\"$attachment_dest_rel2\" />"
-
-      echo "Copying $attachment to $attachment_dest_rel" >&2
-      [ ! -d "$dname" ] && mkdir -p "$dname"
-      cmd="cp -fp \"$attachment\" \"$dname/$attachment_dest\""
-      #echo "CMD: $cmd" >&2
-      eval $cmd
+for href_attachment in $attachments; do
+  attachment="$href_attachment"
+  if [ ! -f "$attachment" ]; then
+    attachment2="$href_attachment.pdf"		# Try FILE.pdf.pdf
+    if echo "$attachments" |egrep -q "$attachment2"; then
+      # FILE.pdf.pdf is already listed for processing; don't process here
+      echo "WARNING: Attachment not found: '$attachment'" >&2
+      continue
     fi
 
-  else
-    echo "WARNING: Attachment not found: '$attachment'" >&2
+    if [ -f "$attachment2" ]; then
+      attachment="$attachment2"			# Found FILE.pdf.pdf; process it
+    else
+      echo "WARNING: Attachment not found: '$attachment' (or '$attachment2')" >&2
+      continue
+    fi
+  fi
 
+  # Attachment file exists
+  if [ ! -z "$dname" ]; then
+    # Replace destination "FILENAME.pdf.pdf" with "FILENAME.pdf"
+    attachment_base=`basename "$attachment"`
+    if echo "$attachment_base" |egrep -q "\.pdf\.pdf$"; then
+      attachment_base=`echo "$attachment_base" |sed 's/\.pdf\.pdf$/.pdf/'`
+    fi
+
+    # Make other destination filenames more meaningful
+    if echo "$attachment_base" |egrep -q "^01front\.pdf$"; then
+      meta_name="I.attachment_abstract"
+      attachment_dest="thesis-01abstract.pdf"
+      attachment_dest2="Abstract.pdf"
+
+    else
+      meta_name="I.attachment"
+      attachment_dest="thesis-$attachment_base"
+      if echo "$attachment_base" |egrep -q "^02"; then
+        ext=""				# Assume no file-extension
+        if echo "$attachment_base" |egrep -q "\."; then
+          ext=`echo "$attachment_base" |sed 's/^.*\.//'`
+        fi
+        attachment_dest2="Thesis-$surname-$complete_year.$ext"
+      else
+        attachment_dest2="Thesis-$surname-$complete_year-$attachment_base"
+      fi
+    fi
+
+    # Path to dest file relative to XML/CSV files
+    attachment_dest_rel="`basename $dname`/$attachment_dest"
+    attachment_dest_rel2="`basename $dname`/$attachment_dest2"
+    echo "  <META NAME=\"${meta_name}_clean0\" CONTENT=\"$attachment_base\" />"
+    echo "  <META NAME=\"${meta_name}_clean1\" CONTENT=\"$attachment_dest_rel\" />"
+    echo "  <META NAME=\"${meta_name}_clean2\" CONTENT=\"$attachment_dest_rel2\" />"
+
+    echo "Copying $attachment to $attachment_dest_rel" >&2
+    [ ! -d "$dname" ] && mkdir -p "$dname"
+    cmd="cp -fp \"$attachment\" \"$dname/$attachment_dest\""
+    #echo "CMD: $cmd" >&2
+    eval $cmd
   fi
 done
 

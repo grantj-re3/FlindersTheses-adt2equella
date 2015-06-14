@@ -40,6 +40,34 @@ usage_exit() {
 }
 
 ##############################################################################
+get_xml_field4() {
+  field_name="$1"
+  xml_field=`awk -F\" -v fn="$field_name" '$2==fn {print $4}' "$xml_fname"`
+}
+
+##############################################################################
+get_xml_field6() {
+  field_name="$1"
+  xml_field=`awk -F\" -v fn="$field_name" '$2==fn {print $6}' "$xml_fname"`
+}
+
+##############################################################################
+get_xml_surname() {
+  field_name="DC.Creator.personalName"
+  xml_field=`awk -F\" -v fn="$field_name" '$2==fn {print $4}' "$xml_fname" |
+    sed 's/,.*$//'
+  `
+}
+
+##############################################################################
+get_xml_complete_year() {
+  field_name="DC.Date.fixed"
+  xml_field=`awk -F\" -v fn="$field_name" '$2==fn {print $6}' "$xml_fname" |
+    sed 's/\-.*$//'
+  `
+}
+
+##############################################################################
 if [ "$1" = --approved -o "$1" = -a ]; then
   EMBARGOED_STR=false
 elif [ "$1" = --embargoed -o "$1" = -e ]; then
@@ -51,6 +79,13 @@ fi
 shift
 [ -z "$1" ] && usage_exit
 dname="$2"
+
+# Extract XML metadata
+xml_fname=`echo "$dname" |sed 's/\.d$/.xml/'`
+get_xml_complete_year
+complete_year="$xml_field"
+get_xml_surname
+surname="$xml_field"
 
 ##############################################################################
 if [ $EMBARGOED_STR = 'false' ]; then
@@ -94,25 +129,38 @@ for attachment in $attachments; do
 
     if [ ! -z "$dname" ]; then
       # Replace destination "FILENAME.pdf.pdf" with "FILENAME.pdf"
-      attachment_dest=`basename "$attachment"`
-      if echo "$attachment_dest" |egrep -q "\.pdf\.pdf$"; then
-        attachment_dest=`echo "$attachment_dest" |sed 's/\.pdf\.pdf$/.pdf/'`
+      attachment_base=`basename "$attachment"`
+      if echo "$attachment_base" |egrep -q "\.pdf\.pdf$"; then
+        attachment_base=`echo "$attachment_base" |sed 's/\.pdf\.pdf$/.pdf/'`
       fi
 
       # Make other destination filenames more meaningful
-      if echo "$attachment_dest" |egrep -q "^01front\.pdf$"; then
-        attachment_dest="thesis-01abstract.pdf"
+      if echo "$attachment_base" |egrep -q "^01front\.pdf$"; then
         meta_name="I.attachment_abstract"
+        attachment_dest="thesis-01abstract.pdf"
+        attachment_dest2="Abstract.pdf"
       else
-        attachment_dest="thesis-$attachment_dest"
         meta_name="I.attachment"
+        attachment_dest="thesis-$attachment_base"
+        if echo "$attachment_base" |egrep -q "^02"; then
+          ext=""				# Assume no file-extension
+          if echo "$attachment_base" |egrep -q "\."; then
+            ext=`echo "$attachment_base" |sed 's/^.*\.//'`
+          fi
+          attachment_dest2="Thesis-$surname-$complete_year.$ext"
+        else
+          attachment_dest2="Thesis-$surname-$complete_year-$attachment_base"
+        fi
       fi
 
       # Path to dest file relative to XML/CSV files
       attachment_dest_rel="`basename $dname`/$attachment_dest"
-      echo "  <META NAME=\"$meta_name\" CONTENT=\"$attachment_dest_rel\" />"
+      attachment_dest_rel2="`basename $dname`/$attachment_dest2"
+      echo "  <META NAME=\"${meta_name}_clean0\" CONTENT=\"$attachment_base\" />"
+      echo "  <META NAME=\"${meta_name}_clean1\" CONTENT=\"$attachment_dest_rel\" />"
+      echo "  <META NAME=\"${meta_name}_clean2\" CONTENT=\"$attachment_dest_rel2\" />"
 
-      echo "Copying $attachment to dir $attachment_dest_rel" >&2
+      echo "Copying $attachment to $attachment_dest_rel" >&2
       [ ! -d "$dname" ] && mkdir -p "$dname"
       cmd="cp -fp \"$attachment\" \"$dname/$attachment_dest\""
       #echo "CMD: $cmd" >&2

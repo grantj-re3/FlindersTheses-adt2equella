@@ -191,7 +191,7 @@
        - We need very strict control of release_date format!
   -->
   <xsl:template match="release/release_date">
-    <xsl:variable name="is_in_future" select="boolean(translate(., '-', '') &gt;=  translate($today, '-', ''))" />
+    <xsl:variable name="is_in_future" select="boolean(translate(., '-', '') &gt;  translate($today, '-', ''))" />
     <xsl:variable name="s_is_valid_release_date">
       <xsl:call-template name="is_iso_date">
         <xsl:with-param name="iso_date" select="." />

@@ -198,14 +198,14 @@ for href_attachment in $attachments; do
 
     # Path to dest file relative to XML/CSV files
     attachment_dest_rel="`basename $dname`/$attachment_dest"
-    attachment_dest_rel2="`basename $dname`/$attachment_dest2"
+    attachment_dest2_rel="`basename $dname`/$attachment_dest2"
     echo "  <META NAME=\"${meta_name}_clean0\" CONTENT=\"$attachment_base\" />"
     echo "  <META NAME=\"${meta_name}_clean1\" CONTENT=\"$attachment_dest_rel\" />"
-    echo "  <META NAME=\"${meta_name}_clean2\" CONTENT=\"$attachment_dest_rel2\" />"
+    echo "  <META NAME=\"${meta_name}_clean2\" CONTENT=\"$attachment_dest2_rel\" />"
 
-    echo "Copying $attachment to $attachment_dest_rel" >&2
+    echo "Copying $attachment to $attachment_dest2_rel" >&2
     [ ! -d "$dname" ] && mkdir -p "$dname"
-    cmd="cp -fp \"$attachment\" \"$dname/$attachment_dest\""
+    cmd="cp -fp \"$attachment\" \"$dname/$attachment_dest2\""
     #echo "CMD: $cmd" >&2
     eval $cmd
   fi

@@ -30,6 +30,7 @@ APP_DIR_TEMP=`dirname "$0"`		# Might be relative (eg "." or "..") or absolute
 APP_DIR=`cd "$APP_DIR_TEMP" ; pwd`	# Absolute dir containing app
 
 EXTRACT_METADATA_SCRIPT="$APP_DIR/extract_adt_metadata.sh"
+EXTRACT_CAT_METADATA_SCRIPT="$APP_DIR/extract_adt_cat_metadata.sh"
 EXTRACT_ATTACHMENTS_SCRIPT="$APP_DIR/extract_adt_attachments.sh"
 XSLT_PATH="$APP_DIR/xml2csv.xsl"
 
@@ -66,6 +67,30 @@ find_adt_filename() {
     if [ ! -f "$fname" ]; then
       echo "[$dir_count] Neither '$fname1' nor '$fname2' exist!!!" >&2
       fname=""
+    fi
+  fi
+}
+
+##############################################################################
+# def find_adt_catalog_filename(dir_name, dir_count)
+# Arg dir_name:      ADT directory
+# Arg dir_count:     ADT directory count
+# Returns catfname:  Empty fname means "file not found".
+##############################################################################
+find_adt_catalog_filename() {
+  dir_name="$1"
+  dir_count="$2"
+  # Filename format 1: adt-SFU20050603.095257/catalog-adt-ADT20050603.095257.html
+  # Filename format 2: adt-SFU20050603.095257/catalog-adt-SFU20050603.095257.html
+  catfname1="$dir_name/catalog-`echo "$dir_name" |sed 's/^adt-SFU/adt-ADT/; s/$/.html/'`"
+  catfname2="$dir_name/catalog-`echo "$dir_name" |sed 's/$/.html/'`"
+
+  catfname="$catfname1"
+  if [ ! -f "$catfname" ]; then
+    catfname="$catfname2"
+    if [ ! -f "$catfname" ]; then
+      echo "[$dir_count] Neither '$catfname1' nor '$catfname2' exist!!!" >&2
+      catfname=""
     fi
   fi
 }
@@ -151,8 +176,13 @@ for dir_name in adt-SFU????????.??????; do
   echo "[$dir_count] Processing $fname; writing to $fname_out"
 
   cmd_metadata="$EXTRACT_METADATA_SCRIPT \"$opt_status\" \"$fname\" > \"$fname_out\" 2>/dev/null"
-  #echo "CMD 1: $cmd_metadata"
+  #echo "CMD 1a: $cmd_metadata"
   eval $cmd_metadata
+
+  find_adt_catalog_filename "$dir_name" "$dir_count"	# Returns catfname
+  cmd_cat_metadata="$EXTRACT_CAT_METADATA_SCRIPT \"$opt_status\" \"$catfname\" >> \"$fname_out\" 2>/dev/null"
+  #echo "CMD 1b: $cmd_cat_metadata"
+  eval $cmd_cat_metadata
 
   if [ $EMBARGOED_STR = 'false' ]; then
     get_adt_index_filepath "$dir_name" "$dir_count"	# Returns target_path

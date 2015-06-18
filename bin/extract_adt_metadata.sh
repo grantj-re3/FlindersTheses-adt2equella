@@ -86,6 +86,9 @@ cat $fname |
 
     # Convert HTML meta-tags to XML. ie.  <META ...> to <META ... />
     s:" *> *$:" />:
+
+    # Ensure only 1 input-element per line on the incoming stream
+    s/<input /\n<input /g
   ' |
 
   awk -F\" -v upload_date="$upload_date" -v ref_no="$ref_no" '

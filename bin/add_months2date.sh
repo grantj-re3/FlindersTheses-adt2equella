@@ -35,17 +35,23 @@ usage_exit() {
 		- mm   = 2 digit month number
 		- dd   = 2 digit day of month
 
-		Eg. $APP  22/10/2012  4
+		Eg. Command:   $APP  22/10/2012  4
+		gives result:  2013-02-22
 	USAGE_MSG
   exit 1
 }
 
 ##############################################################################
-ddmmyyyy="$1"
-num_months="$2"
-
 # Rough check of command line args
-[ $# != 2 ] && usage_exit "" "$STDOUT_ERROR_MSG"
+[ "$1" = -h -o "$1" = --help ] && usage_exit
+[ $# != 2 ] && usage_exit
+
+num_months="$2"
+# Cleanup some dates
+ddmmyyyy=`echo "$1" |tr -s /`	# Convert "02/05///2011" to "02/05/2011"
+[ "$ddmmyyyy" = "2008" ] && ddmmyyyy="01/01/2008"
+[ "$ddmmyyyy" = "19/02/20115" ] && ddmmyyyy="19/02/2015"
+
 if ! echo "$num_months" |egrep -q "^[0-9]+$"; then usage_exit "Error: '$num_months' is not an integer" "$STDOUT_ERROR_MSG"; fi
 if ! echo "$ddmmyyyy" |egrep -q "^[0-9]{1,2}/[0-9]{1,2}/[0-9]{2,4}$"; then usage_exit "Error: '$ddmmyyyy' has invalid date format" "$STDOUT_ERROR_MSG"; fi
 

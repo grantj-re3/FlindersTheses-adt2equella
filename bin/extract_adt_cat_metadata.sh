@@ -12,9 +12,6 @@
 #   cope with newlines within metadata).
 # - Send result to stdout.
 #
-# We are using the approved (admin) HTML page rather than the public/xxxx/index.html
-# page because it contains additional metadata (eg. dept, school).
-#
 ##############################################################################
 app=`basename $0`
 app_dir_temp=`dirname "$0"`		# Might be relative (eg "." or "..") or absolute
@@ -32,6 +29,7 @@ usage_exit() {
 }
 
 ##############################################################################
+# FIXME: Options --approved|-a & --embargoed|-e are not used
 if [ "$1" = --approved -o "$1" = -a ]; then
   EMBARGOED_STR=false
 elif [ "$1" = --embargoed -o "$1" = -e ]; then
@@ -72,19 +70,17 @@ cat $fname |
     /<input.*type=\"hidden\"/ && $4=="adate"      {appr_date=$6; printf "  <META NAME=\"%s%s\" CONTENT=\"%s\" />\n",pref,$4,$6}
 
     END {
+      line_release_date_iso = "Unknown"
+      line_adate_iso = "Unknown"
       if(appr_date != "") {
-
         if(n_months != "") {
           cmd = sprintf("%s %s %s", add_months_exe, appr_date, n_months)
           cmd | getline line_release_date_iso
-        } else {
-          line_release_date_iso = "Unknown"
+          close(cmd)	# Close pipe in case cmd below is identical (ie. n_months=0)
         }
-
-        cmd = sprintf("%s %s %s", add_months_exe, appr_date, 0)
+        cmd = sprintf("%s %s %s", add_months_exe, appr_date, "0")
         cmd | getline line_adate_iso
-      } else {
-        line_adate_iso = "Unknown"
+        close(cmd)
       }
 
       # Release date: format YYYY-MM-DD (or "Unknown")

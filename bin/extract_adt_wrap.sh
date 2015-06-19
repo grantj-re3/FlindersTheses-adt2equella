@@ -6,23 +6,24 @@
 #
 # Extract metadata and attachments from an Australasian Digital Theses (ADT) 
 # system. The files to be processed will either be approved or delayed
-# (ie. embargoed ) HTML files.
+# (ie. embargoed ) HTML files. The metadata and attachments shall be
+# suitable for loading into Equella via the Equella Bulk Importer (EBI).
 #
 # ALGORITHM
-# - Iterate through all ADT approved (or embargoed) html files:
-#   * Extract metadata from approved ADT HTML page.
-#     An example of a approved page within the filesystem is:
-#     /opt/adt/html/uploads/approved/adt-SFU20050603.095257/adt-ADT20050603.095257.html
-#   * For each thesis, invoke the script to extract metadata into an XML file
-#   * For each thesis, invoke the script copy attachments to a subdirectory
-#     and extract metadata into the same XML file
-#   * For each thesis, validate the XML file (using xmllint)
-# - Iterate through all XML files generated above:
-#   * Convert into a single CSV file with XSLT (using xsltproc)
-#
-# BUGS:
-# - Script features are under development. Eg. Script will give errors
-#   when invoked with --embargoed|-e
+# - Iterate through all ADT approved (or embargoed) html files.
+#   For each thesis, create an XML file as follows.
+#   * Invoke the script to extract metadata into the XML file.
+#     An example of such a page within the filesystem is:
+#     /opt/adt/html/uploads/{approved,delayed}/adt-SFU20050603.095257/adt-ADT20050603.095257.html
+#   * Invoke the script to extract other metadata into the XML file.
+#     An example of such a page within the filesystem is:
+#     /opt/adt/html/uploads/{approved,delayed}/adt-SFU20050603.095257/catalog-adt-ADT20050603.095257.html
+#   * Invoke the script copy attachments to a subdirectory
+#     and extract metadata into the XML file.
+#   * Validate the XML file corresponding to this thesis (using xmllint).
+# - Iterate through all XML files generated above. Aggregate them into
+#   a single CSV file with XSLT (using xsltproc). One XML file will be
+#   converted into one CSV record. The CSV file will be EBI compatible.
 #
 ##############################################################################
 APP=`basename $0`
@@ -156,13 +157,17 @@ for dir_name in adt-SFU????????.??????; do
 
   if [ $EMBARGOED_STR = false ]; then
     # Do NOT skip dir_count 1 for the test record at test/adt/html/...
-    [ $dir_count -eq   1 ] && continue	# 2 copies of this thesis; omit this copy
-
-    [ $dir_count -eq  83 ] && continue	# MANUALLY FIX: 2x junk char ("?" in black diamond)
-    [ $dir_count -eq 129 ] && continue	# MANUALLY FIX: spelling errors in sentences 3 & 4 are due to illegal chars
-    [ $dir_count -eq 136 ] && continue	# MANUALLY FIX: 2x Illegal char; KS??? gene
-    [ $dir_count -eq 225 ] && continue	# MANUALLY FIX: 5x di???usion, 1x ???xed
-    [ $dir_count -eq 238 ] && continue	# MANUALLY FIX: Cannot convert thesis CSV from UTF8 to WINDOWS-1250 for review
+    if
+      [ $dir_count -eq   1 ] ||		# 2 copies of this thesis; omit this copy
+      [ $dir_count -eq  83 ] ||		# MANUALLY FIX: 2x junk char ("?" in black diamond)
+      [ $dir_count -eq 129 ] ||		# MANUALLY FIX: spelling errors in sentences 3 & 4 are due to illegal chars
+      [ $dir_count -eq 136 ] ||		# MANUALLY FIX: 2x Illegal char; KS??? gene
+      [ $dir_count -eq 225 ] ||		# MANUALLY FIX: 5x di???usion, 1x ???xed
+      [ $dir_count -eq 238 ]		# MANUALLY FIX: Cannot convert thesis CSV from UTF8 to WINDOWS-1250 for review
+    then
+      echo "[$dir_count] ATTENTION: $dir_name processing will be skipped!"
+      continue
+    fi
   fi
 
   find_adt_filename "$dir_name" "$dir_count"		# Returns fname
@@ -189,7 +194,7 @@ for dir_name in adt-SFU????????.??????; do
   else
     get_adt_embargo_attachments_dirpath "$dir_name" "$dir_count" # Returns target_path
   fi
-  #target_path=/dev/null 				# Avoid extracting attachments
+  target_path=/dev/null 				# Avoid extracting attachments
   cmd_attach="$EXTRACT_ATTACHMENTS_SCRIPT \"$opt_status\" \"$target_path\" \"$dname_out\" >> \"$fname_out\""
   #echo "CMD 2: $cmd_attach"
   eval $cmd_attach

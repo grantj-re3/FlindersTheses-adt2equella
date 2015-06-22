@@ -71,8 +71,10 @@
     <field csv_header_name="fake.X.school.interim_now15"                  >X.school.interim_now15</field>
     <field csv_header_name="fake.X.chair_email"                           >X.chair_email</field>
     <field csv_header_name="item/curriculum/people/coords/coord/name"     >X.chair</field>
-    <!-- FIXME: This release date is NOT suitable for embargoed theses!!! -->
-    <field csv_header_name="item/curriculum/thesis/release/release_date"  >X.upload_date</field>
+
+    <field csv_header_name="item/curriculum/thesis/release/embargo_request/standard_request/duration">Y.num_months</field>
+    <field csv_header_name="item/curriculum/thesis/release/first_approval_date"                      >Y.adate_iso</field>
+    <field csv_header_name="item/curriculum/thesis/release/release_date"                             >Y.release_date_iso</field>
     <!-- FIXME: Other file attributes? -->
 <!--
     <field csv_header_name="item/attachments/attachment/file"             >I.attachment</field>

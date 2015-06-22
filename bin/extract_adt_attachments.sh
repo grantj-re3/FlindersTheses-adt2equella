@@ -23,7 +23,12 @@
 #
 ##############################################################################
 app=`basename $0`
-ADT_PARENT_DIR_COMMON=/opt/adt/html
+
+APP_DIR_TEMP=`dirname "$0"`		# Might be relative (eg "." or "..") or absolute
+OUT_DIR_PARENT=`cd "$APP_DIR_TEMP/.." ; pwd`	# Absolute dir containing out dir parent
+
+###ADT_PARENT_DIR_COMMON=/opt/adt/html
+ADT_PARENT_DIR_COMMON="$OUT_DIR_PARENT/test/adt/html"	# FIXME: Use real ADT dir
 
 ##############################################################################
 usage_exit() {

@@ -72,9 +72,6 @@
     <field csv_header_name="fake.X.chair_email"                           >X.chair_email</field>
     <field csv_header_name="item/curriculum/people/coords/coord/name"     >X.chair</field>
 
-    <field csv_header_name="item/curriculum/thesis/release/embargo_request/standard_request/duration">Y.num_months</field>
-    <field csv_header_name="item/curriculum/thesis/release/first_approval_date"                      >Y.adate_iso</field>
-    <field csv_header_name="item/curriculum/thesis/release/release_date"                             >Y.release_date_iso</field>
     <!-- FIXME: Other file attributes? -->
 <!--
     <field csv_header_name="item/attachments/attachment/file"             >I.attachment</field>
@@ -107,11 +104,12 @@
         <xsl:value-of select="concat($field_delim, $quote, 'item/curriculum/people/students/student/@id', $quote)" />
       </xsl:when>
 
+      <!-- Metadata corresponding to the above CSV header -->
       <xsl:otherwise>
         <xsl:variable name="full_name" select="/ADT_METADATA/HEAD/META[@NAME='DC.Creator.personalName']/@CONTENT" />
         <xsl:variable name="surname" select="normalize-space(substring-before($full_name, ','))" />
         <xsl:variable name="given_names" select="normalize-space(substring-after($full_name, ','))" />
-        <xsl:variable name="surname_given_names" select="concat($given_names, ' ', $surname)" />
+        <xsl:variable name="full_name_display" select="concat($given_names, ' ', $surname)" />
         <xsl:variable name="student_id">
           <xsl:choose>
             <xsl:when test="$embargoed_str = 'false'">FakeIdAdtAppr</xsl:when>
@@ -123,9 +121,35 @@
         <xsl:value-of select="concat($field_delim, $quote, $given_names, $quote)" />
         <xsl:value-of select="concat($field_delim, $quote, $surname, $quote)" />
         <xsl:value-of select="concat($field_delim, $quote, $given_names, $quote)" />
-        <xsl:value-of select="concat($field_delim, $quote, $surname_given_names, $quote)" />
+        <xsl:value-of select="concat($field_delim, $quote, $full_name_display, $quote)" />
         <xsl:value-of select="concat($field_delim, $quote, $student_id, $quote)" />
 
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+
+  <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
+  <xsl:template name="do_release_date">
+    <xsl:param name="is_csv_header" select="false()" />
+
+    <xsl:choose>
+      <xsl:when test="$is_csv_header">
+        <xsl:if test="$embargoed_str != 'false'">
+          <xsl:value-of select="concat($field_delim, $quote, 'item/curriculum/thesis/release/embargo_request/standard_request/duration', $quote)" />
+        </xsl:if>
+
+        <xsl:value-of select="concat($field_delim, $quote, 'item/curriculum/thesis/release/first_approval_date', $quote)" />
+        <xsl:value-of select="concat($field_delim, $quote, 'item/curriculum/thesis/release/release_date', $quote)" />
+      </xsl:when>
+
+      <!-- Metadata corresponding to the above CSV header -->
+      <xsl:otherwise>
+        <xsl:if test="$embargoed_str != 'false'">
+          <xsl:value-of select="concat($field_delim, $quote, /ADT_METADATA/CATALOG_BODY/META[@NAME='Y.num_months']/@CONTENT, $quote)" />
+        </xsl:if>
+
+        <xsl:value-of select="concat($field_delim, $quote, /ADT_METADATA/CATALOG_BODY/META[@NAME='Y.adate_iso']/@CONTENT, $quote)" />
+        <xsl:value-of select="concat($field_delim, $quote, /ADT_METADATA/CATALOG_BODY/META[@NAME='Y.release_date_iso']/@CONTENT, $quote)" />
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
@@ -141,6 +165,7 @@
         <xsl:value-of select="concat($field_delim, $quote, 'item/curriculum/thesis/version/open_access/required', $quote)" />
       </xsl:when>
 
+      <!-- Metadata corresponding to the above CSV header -->
       <xsl:otherwise>
 
         <!-- FIXME: Do any of these fields change for $embargoed_str ? -->
@@ -189,6 +214,10 @@
       <!-- Output processed fields -->
 
       <xsl:call-template name="do_student_name_id">
+        <xsl:with-param name="is_csv_header" select="true()" />
+      </xsl:call-template>
+
+      <xsl:call-template name="do_release_date">
         <xsl:with-param name="is_csv_header" select="true()" />
       </xsl:call-template>
 
@@ -251,6 +280,10 @@
     <!-- Output processed fields -->
 
     <xsl:call-template name="do_student_name_id">
+      <xsl:with-param name="is_csv_header" select="false()" />
+    </xsl:call-template>
+
+    <xsl:call-template name="do_release_date">
       <xsl:with-param name="is_csv_header" select="false()" />
     </xsl:call-template>
 

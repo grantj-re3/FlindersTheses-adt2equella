@@ -40,8 +40,8 @@ OUT_DIR_APPROVED="$OUT_DIR_PARENT/results/ebi_approved"
 OUT_DIR_EMBARGO="$OUT_DIR_PARENT/results/ebi_embargo"
 OUT_CSV_BASENAME=theses_ebi.csv
 
-###ADT_PARENT_DIR_COMMON=/opt/adt/html
-ADT_PARENT_DIR_COMMON="$OUT_DIR_PARENT/test/adt/html"	# FIXME: Use real ADT dir
+ADT_PARENT_DIR_COMMON=/opt/adt/html
+###ADT_PARENT_DIR_COMMON="$OUT_DIR_PARENT/test/adt/html"	# FIXME: Use real ADT dir
 ADT_MD_PARENT_DIR_APPROVED="$ADT_PARENT_DIR_COMMON/uploads/approved"
 ADT_MD_PARENT_DIR_EMBARGO="$ADT_PARENT_DIR_COMMON/uploads/delayed"
 ADT_INDEX_PARENT_DIR_APPROVED="$ADT_PARENT_DIR_COMMON/public"
@@ -195,7 +195,6 @@ for dir_name in adt-SFU????????.??????; do
   else
     get_adt_embargo_attachments_dirpath "$dir_name" "$dir_count" # Returns target_path
   fi
-  target_path=/dev/null 				# Avoid extracting attachments
   cmd_attach="$EXTRACT_ATTACHMENTS_SCRIPT \"$opt_status\" \"$target_path\" \"$dname_out\" >> \"$fname_out\""
   #echo "CMD 2: $cmd_attach"
   eval $cmd_attach

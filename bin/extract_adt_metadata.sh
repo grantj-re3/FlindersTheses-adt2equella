@@ -266,6 +266,7 @@ cat $fname |
       # Use regex to map to current school
       #
       # Fixed:
+      # Approved:
       # c adt-SFU20060227.150043 = haca (theology)
       # c adt-SFU20060612.211358 = env
       # c adt-SFU20061010.104925 = haca (archaeology)
@@ -279,6 +280,10 @@ cat $fname |
       # c adt-SFU20130410.021018 = bs (biological science)
       # c adt-SFU20141013.091753 = haca (archaeology)
       # c adt-SFU20141027.102258 = csem
+      #
+      # Embargoed:
+      # c HACA: ECWAS (English, Creative Writing and Australian Studies)
+      # c adt-SFU20150330.161707 = saps (2 schools; Women’s Studies listed first)
 
       # Before faculties, perform overrides here (which would otherwise be
       # caught by an inadequate rule below)
@@ -286,6 +291,8 @@ cat $fname |
         key = "EDU"
       else if(dir ~ "adt-SFU20061010.104925")
         key = "HACA"
+      else if(dir ~ "adt-SFU20150330.161707")
+        key = "SAPS"
 
       # Faculty of Social and Behavioural Sciences
       else if(sch_lc ~ /business/) 
@@ -304,17 +311,17 @@ cat $fname |
         key = "LAW"
       else if(sch_lc ~ /education/) 
         key = "EDU"
-      else if(sch_lc ~ /humanit[i]?es|screen.* (stud|media)|creative.* writing|english|drama|theology|australian.* stud|yunggorendi *first *nations *centre|tourism|archaeology|french/ || dir ~ "adt-SFU20060227.150043|adt-SFU20100602.095058|adt-SFU20141013.091753")
+      else if(sch_lc ~ /humanit[i]?es|screen.* (stud|media)|creative.* writing|english|drama|theology|australian.* stud|yunggorendi *first *nations *centre|tourism|archaeology|french|ecwas/ || dir ~ "adt-SFU20060227.150043|adt-SFU20100602.095058|adt-SFU20141013.091753")
         key = "HACA"
 
       # Faculty of Science and Engineering
       else if(sch_lc ~ /biolog/ || dir ~ "adt-SFU20130410.021018") 
         key = "BS"
-      else if(sch_lc ~ /chem.* physic|chemistry/ || dir ~ "adt-SFU20080430.132508|adt-SFU20101214.163513") 
+      else if(sch_lc ~ /chem.* physic|chemistry|^caps$/ || dir ~ "adt-SFU20080430.132508|adt-SFU20101214.163513") 
         key = "CAPS"
       else if(sch_lc ~ /informatics.* engin[e]+ring|computer.*(science)?.* engineering.* math/ || dir ~ "adt-SFU20070130.192707|adt-SFU20080115.222927|adt-SFU20141027.102258") 
         key = "CSEM"
-      else if(sch_lc ~ /environment|geography|earth.* science/ || dir ~ "adt-SFU20060612.211358") 
+      else if(sch_lc ~ /environment|geography|earth.* science|environemt/ || dir ~ "adt-SFU20060612.211358") 
         key = "ENV"
 
       # Faculty of Medicine, Nursing and Health Sciences

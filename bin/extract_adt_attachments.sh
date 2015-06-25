@@ -27,8 +27,8 @@ app=`basename $0`
 APP_DIR_TEMP=`dirname "$0"`		# Might be relative (eg "." or "..") or absolute
 OUT_DIR_PARENT=`cd "$APP_DIR_TEMP/.." ; pwd`	# Absolute dir containing out dir parent
 
-###ADT_PARENT_DIR_COMMON=/opt/adt/html
-ADT_PARENT_DIR_COMMON="$OUT_DIR_PARENT/test/adt/html"	# FIXME: Use real ADT dir
+ADT_PARENT_DIR_COMMON=/opt/adt/html
+###ADT_PARENT_DIR_COMMON="$OUT_DIR_PARENT/test/adt/html"	# FIXME: Use real ADT dir
 
 ##############################################################################
 usage_exit() {
@@ -182,7 +182,7 @@ for href_attachment in $attachments; do
     fi
 
     # Make other destination filenames more meaningful
-    if echo "$attachment_base" |egrep -q "^01front\.pdf$"; then
+    if echo "$attachment_base" |egrep -q "^01\.?[Ff]ront\.pdf$"; then
       meta_name="I.attachment_abstract"
       attachment_dest="thesis-01abstract.pdf"
       attachment_dest2="Abstract.pdf"

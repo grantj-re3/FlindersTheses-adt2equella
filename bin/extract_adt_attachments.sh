@@ -73,6 +73,8 @@ get_xml_complete_year() {
 }
 
 ##############################################################################
+# Return a list of file attachments and the number of file attachments
+##############################################################################
 get_attachments_approved() {
   src_fname="$1"
 
@@ -108,8 +110,12 @@ get_attachments_approved() {
       attachments=""
     fi
   fi
+  # This count might not equal the number of real files (eg. if broken hrefs above)
+  num_attachments=`echo "$attachments" |wc -w`
 }
 
+##############################################################################
+# Return a list of file attachments and the number of file attachments
 ##############################################################################
 get_attachments_embargoed() {
   src_dname="$1"
@@ -119,6 +125,7 @@ get_attachments_embargoed() {
     echo "WARNING: '$src_dname' not found (INDEX element will be empty)" >&2
     attachments=""
   fi
+  num_attachments=`echo "$attachments" |wc -w`
 }
 
 ##############################################################################
@@ -145,9 +152,9 @@ surname="$xml_field"
 
 ##############################################################################
 if [ $EMBARGOED_STR = 'false' ]; then
-  get_attachments_approved  "$1"	# Returns $attachments
+  get_attachments_approved  "$1"	# Returns $attachments & $num_attachments
 else
-  get_attachments_embargoed "$1"	# Returns $attachments
+  get_attachments_embargoed "$1"	# Returns $attachments & $num_attachments
 fi
 
 ##############################################################################
@@ -181,7 +188,12 @@ for href_attachment in $attachments; do
       attachment_base=`echo "$attachment_base" |sed 's/\.pdf\.pdf$/.pdf/'`
     fi
 
-    # Make other destination filenames more meaningful
+    ext=""				# Assume no file-extension
+    if echo "$attachment_base" |egrep -q "\."; then
+      ext=`echo "$attachment_base" |sed 's/^.*\.//'`
+    fi
+
+    # [Opt 1,2] Make other destination filenames more meaningful
     if echo "$attachment_base" |egrep -q "^01\.?[Ff]ront\.pdf$"; then
       meta_name="I.attachment_abstract"
       attachment_dest="thesis-01abstract.pdf"
@@ -191,26 +203,36 @@ for href_attachment in $attachments; do
       meta_name="I.attachment"
       attachment_dest="thesis-$attachment_base"
       if echo "$attachment_base" |egrep -q "^02"; then
-        ext=""				# Assume no file-extension
-        if echo "$attachment_base" |egrep -q "\."; then
-          ext=`echo "$attachment_base" |sed 's/^.*\.//'`
-        fi
         attachment_dest2="Thesis-$surname-$complete_year.$ext"
       else
         attachment_dest2="Thesis-$surname-$complete_year-$attachment_base"
       fi
     fi
 
+    # [Opt 3] Make other destination filenames more meaningful
+    if echo "$attachment_base" |egrep -q "^01\.?[Ff]ront\.pdf$"; then
+      meta_name="I.attachment_abstract"
+      attachment_dest3="Thesis-$surname-$complete_year-Abstract.pdf"
+      [ $num_attachments -gt 2 ] && attachment_dest3="Thesis-$surname-$complete_year-01Abstract.pdf"
+
+    else
+      meta_name="I.attachment"
+      attachment_dest3="Thesis-$surname-$complete_year.$ext"
+      [ $num_attachments -gt 2 ] && attachment_dest3="Thesis-$surname-$complete_year-$attachment_base"
+    fi
+
     # Path to dest file relative to XML/CSV files
     attachment_dest_rel="`basename $dname`/$attachment_dest"
     attachment_dest2_rel="`basename $dname`/$attachment_dest2"
+    attachment_dest3_rel="`basename $dname`/$attachment_dest3"
     echo "  <META NAME=\"${meta_name}_clean0\" CONTENT=\"$attachment_base\" />"
     echo "  <META NAME=\"${meta_name}_clean1\" CONTENT=\"$attachment_dest_rel\" />"
     echo "  <META NAME=\"${meta_name}_clean2\" CONTENT=\"$attachment_dest2_rel\" />"
+    echo "  <META NAME=\"${meta_name}_clean3\" CONTENT=\"$attachment_dest3_rel\" />"
 
-    echo "Copying $attachment to $attachment_dest2_rel" >&2
+    echo "Copying $attachment to $attachment_dest3_rel" >&2
     [ ! -d "$dname" ] && mkdir -p "$dname"
-    cmd="cp -fp \"$attachment\" \"$dname/$attachment_dest2\""
+    cmd="cp -fp \"$attachment\" \"$dname/$attachment_dest3\""
     #echo "CMD: $cmd" >&2
     eval $cmd
   fi

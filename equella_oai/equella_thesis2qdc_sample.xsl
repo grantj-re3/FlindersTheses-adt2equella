@@ -233,7 +233,23 @@
 
   <!-- dc:date -->
   <xsl:template match="complete_year">
-    <dc:date> <xsl:value-of select="." /> </dc:date>
+
+    <xsl:variable name="s_is_valid_completion_date">
+      <xsl:call-template name="is_iso_date">
+        <xsl:with-param name="iso_date" select="." />
+      </xsl:call-template>
+    </xsl:variable>
+
+    <!-- If date==YYYY-MM-DD, then extract YYYY; else use date -->
+    <xsl:choose>
+      <xsl:when test="$s_is_valid_completion_date='true'">
+        <dc:date> <xsl:value-of select="substring(., 1, 4)" /> </dc:date>
+      </xsl:when>
+      <xsl:otherwise>
+        <dc:date> <xsl:value-of select="." /> </dc:date>
+      </xsl:otherwise>
+    </xsl:choose>
+
   </xsl:template>
 
   <!-- dc:description -->

@@ -53,7 +53,9 @@
  
   <!-- An "array" containing the XML field-names (and their associated CSV header-names) -->
   <xsl:variable name="fieldArray">
+<!--
     <field csv_header_name="fake.X.ref_no"                                >X.ref_no</field>
+-->
     <field csv_header_name="item/curriculum/people/students/student/email">DC.Creator.personalName.address</field>
     <field csv_header_name="item/curriculum/thesis/title"                 >DC.Title</field>
 
@@ -61,25 +63,24 @@
     <field csv_header_name="item/curriculum/thesis/version/abstract/text" >DC.Description.abstract</field>
     <field csv_header_name="item/curriculum/thesis/complete_year"         >DC.Date.fixed</field>
     <field csv_header_name="item/curriculum/thesis/language"              >DC.Language</field>
-    <!-- FIXME: I think DC.Publisher is derived from X.institution & X.school; use the components?
-    <field csv_header_name="item/curriculum/thesis/publisher"             >DC.Publisher</field>
-    -->
+
     <field csv_header_name="item/curriculum/thesis/@type"                 >X.thesis_type</field>
-    <field csv_header_name="item/curriculum/thesis/publisher"             >X.institution</field>
-    <field csv_header_name="item/curriculum/thesis/faculties/primary"     >X.dept</field>
-    <field csv_header_name="item/curriculum/thesis/schools/primary"       >X.school</field>
+    <field csv_header_name="item/curriculum/thesis/publisher"             >X.publisher_school</field>
+    <field csv_header_name="item/curriculum/thesis/faculties/primary"     >X.faculty.clean1</field>
+    <field csv_header_name="item/curriculum/thesis/schools/primary"       >X.school.clean1</field>
+<!--
     <field csv_header_name="fake.X.school.interim_now15"                  >X.school.interim_now15</field>
     <field csv_header_name="fake.X.chair_email"                           >X.chair_email</field>
+-->
     <field csv_header_name="item/curriculum/people/coords/coord/name"     >X.chair</field>
 
-    <!-- FIXME: Other file attributes? -->
 <!--
-    <field csv_header_name="item/attachments/attachment/file"             >I.attachment</field>
--->
     <field csv_header_name="fake.I.attachment_abstract_clean0"            >I.attachment_abstract_clean0</field>
     <field csv_header_name="fake.I.attachment_abstract_clean2"            >I.attachment_abstract_clean2</field>
     <field csv_header_name="fake.I.attachment_clean0"                     >I.attachment_clean0</field>
     <field csv_header_name="fake.I.attachment_clean2"                     >I.attachment_clean2</field>
+-->
+
     <!-- FIXME: What is XPath for previous ADT identifier?  -->
     <field csv_header_name="item/xxxx/previous_identifier_url"            >DC.Identifier.fixed</field>
 
@@ -178,7 +179,8 @@
 
       <!-- Metadata corresponding to the above CSV header -->
       <xsl:otherwise>
-        <xsl:value-of select="concat($field_delim, $quote, '', $quote)" />
+        <!-- FIXME: Should subject be reviewed so it contains something better than 'Thesis' -->
+        <xsl:value-of select="concat($field_delim, $quote, 'Thesis', $quote)" />
         <xsl:value-of select="concat($field_delim, $quote, '2015 lib import version', $quote)" />
         <xsl:value-of select="concat($field_delim, $quote, 'I agree', $quote)" />
         <xsl:value-of select="concat($field_delim, $quote, 'Yes', $quote)" />
@@ -207,9 +209,9 @@
 
     <xsl:choose>
       <xsl:when test="$is_csv_header">
-        <xsl:value-of select="concat($field_delim, $quote, 'item/curriculum/thesis/version/examined_thesis/files/uuid', $quote)" />
-        <xsl:value-of select="concat($field_delim, $quote, 'item/curriculum/thesis/version/abstract/uuid', $quote)" />
         <xsl:value-of select="concat($field_delim, $quote, 'item/curriculum/thesis/version/open_access/required', $quote)" />
+        <xsl:value-of select="concat($field_delim, $quote, 'item/curriculum/thesis/version/abstract/uuid', $quote)" />
+        <xsl:value-of select="concat($field_delim, $quote, 'item/curriculum/thesis/version/examined_thesis/files/uuid', $quote)" />
       </xsl:when>
 
       <!-- Metadata corresponding to the above CSV header -->
@@ -219,7 +221,7 @@
         <xsl:variable name="thesis_files">
 
           <!-- Permit repeated fields -->
-          <xsl:for-each select="/ADT_METADATA/INDEX/META[@NAME='I.attachment']/@CONTENT">
+          <xsl:for-each select="/ADT_METADATA/INDEX/META[@NAME='I.attachment_clean3']/@CONTENT">
             <xsl:if test="position() != 1">
               <xsl:value-of select="$subfield_delim"/>
             </xsl:if>
@@ -227,12 +229,12 @@
           </xsl:for-each>
 
         </xsl:variable>
-        <xsl:variable name="abstract_file" select="/ADT_METADATA/INDEX/META[@NAME='I.attachment_abstract']/@CONTENT" />
+        <xsl:variable name="abstract_file" select="/ADT_METADATA/INDEX/META[@NAME='I.attachment_abstract_clean3']/@CONTENT" />
         <xsl:variable name="open_access_req" select="'version of record'" />
 
-        <xsl:value-of select="concat($field_delim, $quote, $thesis_files, $quote)" />
-        <xsl:value-of select="concat($field_delim, $quote, $abstract_file, $quote)" />
         <xsl:value-of select="concat($field_delim, $quote, $open_access_req, $quote)" />
+        <xsl:value-of select="concat($field_delim, $quote, $abstract_file, $quote)" />
+        <xsl:value-of select="concat($field_delim, $quote, $thesis_files, $quote)" />
 
       </xsl:otherwise>
     </xsl:choose>

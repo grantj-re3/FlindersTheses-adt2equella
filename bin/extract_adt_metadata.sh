@@ -228,8 +228,12 @@ cat $fname |
   ' |
 
   awk -F\" -v root_dir="$root_dir" '
-    # Insert X.school.interim_now15 before the closing </BODY> tag.
-    # Map to current school.
+    # Map thesis to current school.
+    # Insert the following before the closing </BODY> tag:
+    # - X.school.interim_now15
+    # - X.school.clean1
+    # - X.faculty.clean1
+    # - X.publisher_school
     BEGIN {
       OFS="\""
       fname_sch_conf = root_dir "/etc/schools_now_xmlfields.csv"
@@ -254,9 +258,10 @@ cat $fname |
       }
     }
 
-    $2=="X.school"   {sch = $4}
-    $2=="X.dept"     {fac = $4}
-    $2=="X.dir_name" {dir = $4}
+    $2=="X.school"      {sch = $4}
+    $2=="X.dept"        {fac = $4}
+    $2=="X.dir_name"    {dir = $4}
+    $2=="X.institution" {inst = $4}
     !/<\/BODY>/ {print $0}
 
     /<\/BODY>/ {
@@ -332,14 +337,20 @@ cat $fname |
       else if(sch_lc ~ /nursing/) 
         key = "NM"
 
-      if(key == "")
+      if(key == "") {
         val = sch
-      else
+        val_sch = sch
+        val_fac = fac
+      } else {
         val = "[[" key "]] " ref_sch[key] " (" ref_fac[key] ")"
-      end
+        val_sch = ref_sch[key]
+        val_fac = ref_fac[key]
+      }
 
-      #val = "GJ: " sch " (" fac ")"
       printf "  <META NAME=\"X.school.interim_now15\" CONTENT=\"%s\" />\n", val
+      printf "  <META NAME=\"X.school.clean1\" CONTENT=\"%s\" />\n", val_sch
+      printf "  <META NAME=\"X.faculty.clean1\" CONTENT=\"%s\" />\n", val_fac
+      printf "  <META NAME=\"X.publisher_school\" CONTENT=\"%s, %s\" />\n", inst, val_sch
       print $0
     }
   ' |

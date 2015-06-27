@@ -164,7 +164,8 @@ for dir_name in adt-SFU????????.??????; do
       [ $dir_count -eq 129 ] ||		# MANUALLY FIX: spelling errors in sentences 3 & 4 are due to illegal chars
       [ $dir_count -eq 136 ] ||		# MANUALLY FIX: 2x Illegal char; KS??? gene
       [ $dir_count -eq 225 ] ||		# MANUALLY FIX: 5x di???usion, 1x ???xed
-      [ $dir_count -eq 238 ]		# MANUALLY FIX: Cannot convert thesis CSV from UTF8 to WINDOWS-1250 for review
+      [ $dir_count -eq 238 ] ||		# MANUALLY FIX: Cannot convert thesis CSV from UTF8 to WINDOWS-1250 for review
+      [ $dir_count -eq 359 ]		# MANUALLY FIX: Publisher is not Flinders Uni
     then
       echo "[$dir_count] ATTENTION: $dir_name processing will be skipped!"
       continue

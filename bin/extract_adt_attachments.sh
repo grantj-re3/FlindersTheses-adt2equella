@@ -57,13 +57,22 @@ get_xml_field6() {
 }
 
 ##############################################################################
-get_xml_surname() {
+# Extract surname from the XML. XML name format is "SURNAME, GIVEN NAMES".
+# Strip leading/trailing space; replace multiple spaces with a single space.
+# Replace remaining spaces with underscore (for convenient filename usage).
+##############################################################################
+get_xml_surname_nospace() {
   field_name="DC.Creator.personalName"
   xml_field=`awk -F\" -v fn="$field_name" '$2==fn {print $4}' "$xml_fname" |
-    sed 's/,.*$//'
+    sed 's/,.*$//' |
+    xargs echo |
+    tr ' ' '_'
   `
 }
 
+##############################################################################
+# Extract completion date from the XML. Format is YYYY-MM-DD or YYYY-MM or
+# YYYY. Return only the YYYY component.
 ##############################################################################
 get_xml_complete_year() {
   field_name="DC.Date.fixed"
@@ -149,7 +158,7 @@ dname="$2"
 xml_fname=`echo "$dname" |sed 's/\.d$/.xml/'`
 get_xml_complete_year
 complete_year="$xml_field"
-get_xml_surname
+get_xml_surname_nospace
 surname="$xml_field"
 
 ##############################################################################

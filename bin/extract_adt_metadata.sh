@@ -141,6 +141,10 @@ cat $fname |
   ' |
 
   sed '
+    # Escape &quot; for CSV compatibility
+    # NOTE: awk(\&quot;\&quot;) -> xml(&quot;&quot;) -> CSV-text("")
+    s/&quot;/\&quot;\&quot;/g
+
     # Temporarily convert double-quotes for NAME,SCHEME,CONTENT attributes into pipes
     s/\(NAME=\)"\([0-9A-Za-z_\.]*\)"/\1|\2|/g
     s/\(SCHEME=\)"\([0-9A-Za-z_\.]*\)"/\1|\2|/g

@@ -88,6 +88,8 @@ get_attachments_approved() {
         s/\">.*$//
       "
     `
+    # Remove duplicates (assumes no spaces in filenames)
+    attachments=`echo "$attachments" |xargs echo |tr ' ' '\n' |sort -u`
   else
     # Would not expect to get here but... yet more cleanup needed
     echo "WARNING: '$src_fname' not found; trying attachment folder" >&2
@@ -188,9 +190,9 @@ for href_attachment in $attachments; do
       attachment_base=`echo "$attachment_base" |sed 's/\.pdf\.pdf$/.pdf/'`
     fi
 
-    ext=""				# Assume no file-extension
+    dest_ext=""				# Assume no file-extension
     if echo "$attachment_base" |egrep -q "\."; then
-      ext=`echo "$attachment_base" |sed 's/^.*\.//'`
+      dest_ext=`echo "$attachment_base" |sed 's/^.*\.//' |tr A-Z a-z`
     fi
 
     # [Opt 1,2] Make other destination filenames more meaningful
@@ -203,21 +205,22 @@ for href_attachment in $attachments; do
       meta_name="I.attachment"
       attachment_dest="thesis-$attachment_base"
       if echo "$attachment_base" |egrep -q "^02"; then
-        attachment_dest2="Thesis-$surname-$complete_year.$ext"
+        attachment_dest2="Thesis-$surname-$complete_year.$dest_ext"
       else
         attachment_dest2="Thesis-$surname-$complete_year-$attachment_base"
       fi
     fi
 
     # [Opt 3] Make other destination filenames more meaningful
-    if echo "$attachment_base" |egrep -q "^01\.?[Ff]ront\.pdf$"; then
+    # Detect variations of 01front.pdf
+    if echo "$attachment_base" |tr A-Z a-z |egrep -q "^01\.?front\.pdf$"; then
       meta_name="I.attachment_abstract"
       attachment_dest3="Thesis-$surname-$complete_year-Abstract.pdf"
       [ $num_attachments -gt 2 ] && attachment_dest3="Thesis-$surname-$complete_year-01Abstract.pdf"
 
     else
       meta_name="I.attachment"
-      attachment_dest3="Thesis-$surname-$complete_year.$ext"
+      attachment_dest3="Thesis-$surname-$complete_year.$dest_ext"
       [ $num_attachments -gt 2 ] && attachment_dest3="Thesis-$surname-$complete_year-$attachment_base"
     fi
 

@@ -70,6 +70,8 @@
     <field csv_header_name="item/curriculum/thesis/schools/primary"       >X.school.clean1</field>
 <!--
     <field csv_header_name="fake.X.school.interim_now15"                  >X.school.interim_now15</field>
+    <field csv_header_name="fake.X.school.notcleaned"                     >X.school</field>
+    <field csv_header_name="fake.X.dept.notcleaned"                       >X.dept</field>
     <field csv_header_name="fake.X.chair_email"                           >X.chair_email</field>
 -->
     <field csv_header_name="item/curriculum/people/coords/coord/name"     >X.chair</field>

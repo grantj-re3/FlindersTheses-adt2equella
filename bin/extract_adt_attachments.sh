@@ -65,6 +65,7 @@ get_xml_surname_nospace() {
   field_name="DC.Creator.personalName"
   xml_field=`awk -F\" -v fn="$field_name" '$2==fn {print $4}' "$xml_fname" |
     sed 's/,.*$//' |
+    tr -d "'" |
     xargs echo |
     tr ' ' '_'
   `

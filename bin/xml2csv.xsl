@@ -65,7 +65,9 @@
     <field csv_header_name="item/curriculum/thesis/language"              >DC.Language</field>
 
     <field csv_header_name="item/curriculum/thesis/@type"                 >X.thesis_type</field>
+<!-- FIXME: This field will be populated by Equella team
     <field csv_header_name="item/curriculum/thesis/publisher"             >X.publisher_school</field>
+-->
     <field csv_header_name="item/curriculum/thesis/faculties/primary"     >X.faculty.clean1</field>
     <field csv_header_name="item/curriculum/thesis/schools/primary"       >X.school.clean1</field>
 <!--

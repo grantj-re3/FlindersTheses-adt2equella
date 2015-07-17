@@ -29,7 +29,6 @@ usage_exit() {
 }
 
 ##############################################################################
-# FIXME: Options --approved|-a & --embargoed|-e are not used
 if [ "$1" = --approved -o "$1" = -a ]; then
   EMBARGOED_STR=false
 elif [ "$1" = --embargoed -o "$1" = -e ]; then
@@ -88,6 +87,39 @@ cat $fname |
       printf "  <META NAME=\"%s%s\" CONTENT=\"%s\" />\n", pref, "release_date_iso", line_release_date_iso
       printf "</CATALOG_BODY>\n"
     }
+  ' |
+  awk -F\" -v EMBARGOED_STR="$EMBARGOED_STR" -v fname="$fname" '
+    # Fix ISO dates which are "Unknown".
+    BEGIN {
+      OFS="\""
+    }
+
+    $2 == "Y.adate_iso" {
+      if(EMBARGOED_STR == "false" && fname ~ /\/catalog-adt-ADT20050603.095257.html$/) {
+        printf "  <META NAME=\"%s\" CONTENT=\"%s\" />\n", "Y.num_months", "0"
+        printf "  <META NAME=\"%s\" CONTENT=\"%s\" />\n", "Y.adate", "NotFound"
+        printf "  <META NAME=\"%s\" CONTENT=\"%s\" />\n", $2, "2005-06-03"
+      }
+      else if(EMBARGOED_STR == "false" && fname ~ /\/catalog-adt-ADT20050707.103356.html$/) {
+        printf "  <META NAME=\"%s\" CONTENT=\"%s\" />\n", "Y.num_months", "0"
+        printf "  <META NAME=\"%s\" CONTENT=\"%s\" />\n", "Y.adate", "NotFound"
+        printf "  <META NAME=\"%s\" CONTENT=\"%s\" />\n", $2, "2005-07-07"
+      }
+      else
+        print $0
+    }
+
+    $2 == "Y.release_date_iso" {
+      if(EMBARGOED_STR == "false" && fname ~ /\/catalog-adt-ADT20050603.095257.html$/)
+        printf "  <META NAME=\"%s\" CONTENT=\"%s\" />\n", $2, "2005-06-03"
+      else if(EMBARGOED_STR == "false" && fname ~ /\/catalog-adt-ADT20050707.103356.html$/)
+        printf "  <META NAME=\"%s\" CONTENT=\"%s\" />\n", $2, "2005-07-07"
+      else
+        print $0
+    }
+
+
+    ($2 != "Y.adate_iso" && $2 != "Y.release_date_iso") {print $0}
   '
 
 exit 0

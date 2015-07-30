@@ -193,6 +193,40 @@ cat $fname |
     s:| />:" />:g
   ' |
 
+  awk -F\" '
+    # Clean DC.Subject.
+    #   Multi-valued dc.subject (Equella item/curriculum/thesis/keywords/keyword)
+    #   should be delimited with comma (not semi-colon). The method below is a
+    #   fudge - we should really create a new DC.Subject XML element for each
+    #   multi-valued field and let the XSLT script take care of concatenating them.
+    BEGIN {OFS="\""}
+
+    $2=="DC.Subject" {
+      if($4=="aged care; alternative therapies; complementary therapies; dementia; early onset dementia; one to one interaction; quality of life; Reiki; therapeutic touch; unconventional therapies")
+        $4 = "aged care,alternative therapies,complementary therapies,dementia,early onset dementia,one to one interaction,quality of life,Reiki,therapeutic touch,unconventional therapies"
+
+      else if($4=="germination strategies;  seed size and number; salinity tolerance; arid zone plants; Australian flora; soil properties; revegetation potential")
+        $4 = "germination strategies,seed size and number,salinity tolerance,arid zone plants,Australian flora,soil properties,revegetation potential"
+
+      else if($4=="community pharmacy;")
+        $4 = "community pharmacy"
+
+      else if($4=="skin cancer; mangosteen; xanthones; cytotoxicity; apoptosis; survival pathway; metastasis")
+        $4 = "skin cancer,mangosteen,xanthones,cytotoxicity,apoptosis,survival pathway,metastasis"
+
+      else if($4=="verse novel; children'\''s and adolescent / young adult (YA) literature; voice-zone")
+        $4 = "verse novel,children'\''s and adolescent / young adult (YA) literature,voice-zone"
+
+      else if($4=="Psychology of War; Adelaide")
+        $4 = "Psychology of War,Adelaide"
+
+      else if($4=="Gender;")
+        $4 = "Gender"
+    }
+
+    {print $0}
+  ' |
+
   awk -F\" -v EMBARGOED_STR="$EMBARGOED_STR" '
     # Convert DC.Language to give name ("English") rather than RFC1766
     # (ISO639-1) language code ("en"). We retain the xml attribute SCHEME=
@@ -226,7 +260,7 @@ cat $fname |
       $2 = "DC.Date.fixed"
       $6 = gensub("^.*[\/ \.\-]([0-9]+)$", "\\1", "", $6)	# Strip leading day or month
       $6 = gensub("^([0-9][0-9])$", "20\\1", "", $6)		# Convert YY to YYYY
-      $6 = gensub("^(.*)$", "\\1-01-01", "", $6)		# Convert YYYY to YYYY-MM-DD
+      #$6 = gensub("^(.*)$", "\\1-01-01", "", $6)		# Convert YYYY to YYYY-MM-DD
       print $0
     }
   ' |
@@ -243,22 +277,23 @@ cat $fname |
       fname_sch_conf = root_dir "/etc/schools_now_xmlfields.csv"
       fname_debug    = root_dir "/debug_schools.log"
 
-      # Read school records with format "FacultyName","SchoolKey","SchoolName". Eg.
-      # "Faculty of Science and Engineering","BS","School of Biological Sciences"
-      # SchoolCodes = BUS,IS,PSY,SAPS. LAW,EDU,HACA. BS,CAPS,CSEM,ENV. HS,MED,NM.
+      # Read school records with format "FacultyName","SchoolKey","SchoolName","SchoolOrgUnit". Eg.
+      # "Faculty of Science and Engineering","BS","School of Biological Sciences","330"
+      # SchoolCodes = BUS,IS,PSY,SAPS,NILS. LAW,EDU,HACA,BAO. BS,CAPS,CSEM,ENV. HS,MED,NM
       i = 0			# Line number
       while (getline < fname_sch_conf) {
         split($0, col, "\"")
         key = col[4]
         ref_fac[key] = col[2]
         ref_sch[key] = col[6]
+        ref_org[key] = col[8]
 
         i++
         keys_sorted[i] = key
       }
       for(i=1; i<=length(keys_sorted); i++) {
         key = keys_sorted[i]
-        printf(" %2d %-6s %-60s %-60s\n", i, key, ref_sch[key], ref_fac[key]) > fname_debug
+        printf(" %2d %-6s %-3s %-60s %-60s\n", i, key, ref_org[key], ref_sch[key], ref_fac[key]) > fname_debug
       }
     }
 
@@ -342,17 +377,20 @@ cat $fname |
         key = "NM"
 
       if(key == "") {
-        val = sch
         val_sch = sch
         val_fac = fac
+        val_org = "Unknown"
+        val = sch
       } else {
-        val = "[[" key "]] " ref_sch[key] " (" ref_fac[key] ")"
         val_sch = ref_sch[key]
         val_fac = ref_fac[key]
+        val_org = ref_org[key]
+        val = sprintf("[[%s]] %s %s (%s)", key, val_org, val_sch, val_fac)
       }
 
       printf "  <META NAME=\"X.school.interim_now15\" CONTENT=\"%s\" />\n", val
       printf "  <META NAME=\"X.school.clean1\" CONTENT=\"%s\" />\n", val_sch
+      printf "  <META NAME=\"X.school_org_unit.clean1\" CONTENT=\"%s\" />\n", val_org
       printf "  <META NAME=\"X.faculty.clean1\" CONTENT=\"%s\" />\n", val_fac
       printf "  <META NAME=\"X.publisher_school\" CONTENT=\"%s, %s\" />\n", inst, val_sch
       print $0

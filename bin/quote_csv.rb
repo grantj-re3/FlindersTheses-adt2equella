@@ -6,6 +6,7 @@
 #++ 
 #
 # Read a CSV; force all fields to be quoted; write to STDOUT.
+# Assumes fields do not contain the QUOTE character.
 ##############################################################################
 # Add dirs to the library path
 $: << File.expand_path("../lib", File.dirname(__FILE__))

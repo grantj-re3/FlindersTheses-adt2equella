@@ -246,6 +246,8 @@ for href_attachment in $attachments; do
     echo "Copying $attachment to $attachment_dest3_rel" >&2
     [ ! -d "$dname" ] && mkdir -p "$dname"
     cmd="cp -fp \"$attachment\" \"$dname/$attachment_dest3\""
+    #cmd="touch \"$dname/$attachment_dest3\""	# Create empty file for testing
+
     #echo "CMD: $cmd" >&2
     eval $cmd
   fi

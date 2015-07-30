@@ -67,9 +67,10 @@
     <field csv_header_name="item/curriculum/thesis/@type"                 >X.thesis_type</field>
 <!-- FIXME: This field will be populated by Equella team
     <field csv_header_name="item/curriculum/thesis/publisher"             >X.publisher_school</field>
--->
     <field csv_header_name="item/curriculum/thesis/faculties/primary"     >X.faculty.clean1</field>
-    <field csv_header_name="item/curriculum/thesis/schools/primary"       >X.school.clean1</field>
+-->
+    <field csv_header_name="item/curriculum/thesis/schools/current_schools/current_school/name"     >X.school.clean1</field>
+    <field csv_header_name="item/curriculum/thesis/schools/current_schools/current_school/org_unit" >X.school_org_unit.clean1</field>
 <!--
     <field csv_header_name="fake.X.school.interim_now15"                  >X.school.interim_now15</field>
     <field csv_header_name="fake.X.school.notcleaned"                     >X.school</field>
@@ -85,8 +86,7 @@
     <field csv_header_name="fake.I.attachment_clean2"                     >I.attachment_clean2</field>
 -->
 
-    <!-- FIXME: What is XPath for previous ADT identifier?  -->
-    <field csv_header_name="item/xxxx/previous_identifier_url"            >DC.Identifier.fixed</field>
+    <field csv_header_name="item/curriculum/thesis/version/previous_identifier_url" >DC.Identifier.fixed</field>
 
   </xsl:variable>
   <xsl:variable name="fields" select="document('')/*/xsl:variable[@name='fieldArray']/*" />
@@ -166,7 +166,9 @@
 
     <xsl:choose>
       <xsl:when test="$is_csv_header">
+        <!--
         <xsl:value-of select="concat($field_delim, $quote, 'item/curriculum/thesis/subjects/subject', $quote)" />
+        -->
         <xsl:value-of select="concat($field_delim, $quote, 'item/curriculum/thesis/version/thesis_version', $quote)" />
         <xsl:value-of select="concat($field_delim, $quote, 'item/curriculum/thesis/agreements/authenticity', $quote)" />
         <xsl:value-of select="concat($field_delim, $quote, 'item/curriculum/thesis/agreements/declaration', $quote)" />
@@ -184,7 +186,9 @@
       <!-- Metadata corresponding to the above CSV header -->
       <xsl:otherwise>
         <!-- FIXME: Should subject be reviewed so it contains something better than 'Thesis' -->
+        <!--
         <xsl:value-of select="concat($field_delim, $quote, 'Thesis', $quote)" />
+        -->
         <xsl:value-of select="concat($field_delim, $quote, '2015 lib import version', $quote)" />
         <xsl:value-of select="concat($field_delim, $quote, 'I agree', $quote)" />
         <xsl:value-of select="concat($field_delim, $quote, 'Yes', $quote)" />

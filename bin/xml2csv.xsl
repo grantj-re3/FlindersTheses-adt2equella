@@ -71,6 +71,7 @@
 -->
     <field csv_header_name="item/curriculum/thesis/schools/current_schools/current_school/name"     >X.school.clean1</field>
     <field csv_header_name="item/curriculum/thesis/schools/current_schools/current_school/org_unit" >X.school_org_unit.clean1</field>
+    <field csv_header_name="fake.X.old_school_required"                                             >X.old_school_required</field>
 <!--
     <field csv_header_name="fake.X.school.interim_now15"                  >X.school.interim_now15</field>
     <field csv_header_name="fake.X.school.notcleaned"                     >X.school</field>

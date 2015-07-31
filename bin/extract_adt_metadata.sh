@@ -390,9 +390,65 @@ cat $fname |
 
       printf "  <META NAME=\"X.school.interim_now15\" CONTENT=\"%s\" />\n", val
       printf "  <META NAME=\"X.school.clean1\" CONTENT=\"%s\" />\n", val_sch
+      printf "  <META NAME=\"X.school_key.clean1\" CONTENT=\"%s\" />\n", key
       printf "  <META NAME=\"X.school_org_unit.clean1\" CONTENT=\"%s\" />\n", val_org
       printf "  <META NAME=\"X.faculty.clean1\" CONTENT=\"%s\" />\n", val_fac
       printf "  <META NAME=\"X.publisher_school\" CONTENT=\"%s, %s\" />\n", inst, val_sch
+      print $0
+    }
+  ' |
+
+  awk -F\" -v root_dir="$root_dir" '
+    # Flag if old/original school needs to be manually determined.
+    # Insert the following before the closing </BODY> tag:
+    # - X.old_school_required
+    BEGIN {
+      OFS="\""
+      fname_ys_conf  = root_dir "/etc/year_sch_notuniq.csv"
+      fname_ys_debug = root_dir "/debug_year_sch_notuniq.log"
+
+      # The CSV file lists all year-schoolkey pairs between
+      # 2002-2011 inclusive for which the current school does
+      # not uniquely map to an (old) school in the specified
+      # year. Hence the old school needs to be populated
+      # manually for:
+      # - such year-schoolkey pairs, and
+      # - for years before 2002
+      #
+      # CSV line format is "YYYY,SchoolKey". Eg.
+      #   2010,HACA
+      i = 0			# Line number
+      while (getline < fname_ys_conf) {
+        keys[$0] = "1"
+
+        i++
+        keys_sorted[i] = $0
+      }
+      for(i=1; i<=length(keys_sorted); i++) {
+        printf(" %2d %s\n", i, keys_sorted[i]) > fname_ys_debug
+      }
+    }
+
+    $2=="X.school_key.clean1" {current_school_key = $4}
+    $2=="DC.Date.fixed" {complete_year = $6}
+    !/<\/BODY>/ {print $0}
+
+    /<\/BODY>/ {
+      old_school = ""
+
+      if(current_school_key == "" || complete_year == "")
+        old_school = "DependencyError"
+
+      else if(complete_year < 2002)
+        old_school = "OldSchoolNeeded"
+
+      else {
+        for (key in keys)
+          if(sprintf("%s,%s",complete_year,current_school_key) == key)
+            old_school = "OldSchoolNeeded"
+      }
+
+      printf "  <META NAME=\"X.old_school_required\" CONTENT=\"%s\" />\n", old_school
       print $0
     }
   ' |

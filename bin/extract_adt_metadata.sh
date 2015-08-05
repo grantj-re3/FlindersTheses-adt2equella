@@ -214,7 +214,10 @@ cat $fname |
       else if($4=="skin cancer; mangosteen; xanthones; cytotoxicity; apoptosis; survival pathway; metastasis")
         $4 = "skin cancer,mangosteen,xanthones,cytotoxicity,apoptosis,survival pathway,metastasis"
 
-      else if($4=="verse novel; children'\''s and adolescent / young adult (YA) literature; voice-zone")
+      # Unable to match field (with ==) on string below.
+      # Unable to match end of field (with $) on regex below.
+      # Perhaps related to one of the special chars in string?
+      else if($4 ~ /^verse novel; children'\''s and adolescent \/ young adult \(YA\) literature; voice-zone/)
         $4 = "verse novel,children'\''s and adolescent / young adult (YA) literature,voice-zone"
 
       else if($4=="Psychology of War; Adelaide")

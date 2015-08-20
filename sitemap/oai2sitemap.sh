@@ -26,22 +26,23 @@
 # Requires:
 # - get_oai_pages (from https://github.com/grantj-re3/FlindersRedbox-rif2website.git)
 # - ruby 1.8.7 (which get_oai_pages depends upon)
-# - xmllint
 ##############################################################################
+# Customise the variables in this section and the function
+# extract_target_urls_from_oai_files().
+
 PATH=/bin:/usr/bin:/usr/local/bin;	export PATH
 
-# Customise the function extract_target_urls_from_oai_files() and the
-# variables in this section.
-
 # Initial URL of the OAI-PMH provider
-url_oai="http://equella_repo_host/mypath/oai?verb=ListRecords&metadataPrefix=oai_qdc_rhd&set=xxxx"
+url_oai="http://oai_repo_host/mypath/oai?verb=ListRecords&metadataPrefix=oai_qdc_rhd&set=xxxx"
 
 # Sitemap destination filename
 fname_dest_sitemap="/my/sitemap/path/sitemap.xml.gz"
-target_url_prefix="https://equella_or_proxy_target_host/view/"
+
+# Assumes harvested URLs all have same web host & path
+target_url_prefix="https://target_host/view/"
 
 # Strongly recommend using absolute paths as matching files will be deleted.
-# Strongly recommend that these file/dir names do NOT contain white space.
+# Pattern must NOT contain white space.
 temp_dir="/my/sitemap/temp/dir"
 fname_oai_pattern="$temp_dir/oai_page_[0-9][0-9][0-9][0-9].xml"
 
@@ -63,6 +64,7 @@ delete_oai_files() {
   if [ $? = 0 ]; then
     echo "Deleting: `ls -1 $fname_oai_pattern |xargs echo`"
     # BEWARE: This command deletes multiple files without prompting!
+    # BEWARE: Pattern must NOT contain white space.
     rm -f $fname_oai_pattern
   fi
 }
@@ -73,7 +75,8 @@ delete_oai_files() {
 extract_target_urls_from_oai_files() {
   # Iterate through each OAI-PMH page file.
   for fname in $fname_oai_pattern; do
-    xmllint --format $fname |
+    # Add newline after every closing tag to make metadata extraction easier
+    sed 's~\(</[A-Za-z:_]*>\)~\1\n~g' $fname |
       egrep "<dc:identifier type=\"dcterms:URI\">" |
       sed "
         s~</dc:identifier>.*$~~

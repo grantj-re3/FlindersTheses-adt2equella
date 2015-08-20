@@ -32,8 +32,11 @@
 
 PATH=/bin:/usr/bin:/usr/local/bin;	export PATH
 
+GET_OAI_PAGES_EXE="$HOME/opt/get_oai_pages/bin/get_oai_pages.rb"
+
 # Initial URL of the OAI-PMH provider
-url_oai="http://oai_repo_host/mypath/oai?verb=ListRecords&metadataPrefix=oai_qdc_rhd&set=xxxx"
+#url_oai="http://oai_repo_host/mypath/oai?verb=ListRecords&metadataPrefix=oai_qdc_rhd&set=xxxx"
+url_oai="http://oai_repo_host/mypath/oai?verb=ListIdentifiers&metadataPrefix=oai_qdc_rhd&set=xxxx"
 
 # Sitemap destination filename
 fname_dest_sitemap="/my/sitemap/path/sitemap.xml.gz"
@@ -72,7 +75,7 @@ delete_oai_files() {
 ##############################################################################
 # Write URLs to STDOUT; one URL per line.
 # Customise this function (eg. egrep and sed) to extract the required URLs.
-extract_target_urls_from_oai_files() {
+extract_target_urls_from_oai_ListRecords_files() {
   # Iterate through each OAI-PMH page file.
   for fname in $fname_oai_pattern; do
     # Add newline after every closing tag to make metadata extraction easier
@@ -83,6 +86,28 @@ extract_target_urls_from_oai_files() {
         s~^.*/\(theses\|view\)/~$target_url_prefix~
       " # |ruby -r cgi -ne 'puts CGI.escape($_)'	# URL-encode
   done
+}
+
+##############################################################################
+# Write URLs to STDOUT; one URL per line.
+# Customise this function (eg. egrep and sed) to extract the required URLs.
+extract_target_urls_from_oai_ListIdentifiers_files() {
+  # Iterate through each OAI-PMH page file.
+  for fname in $fname_oai_pattern; do
+    # Add newline after every closing tag to make metadata extraction easier
+    sed 's~\(</[A-Za-z:_]*>\)~\1\n~g' $fname |
+      egrep "</identifier>" |
+      sed "
+        s~</identifier>.*$~~
+        s~^.*\(/theses/\|/view/\|\.edu\.au:\)~$target_url_prefix~
+      " # |ruby -r cgi -ne 'puts CGI.escape($_)'	# URL-encode
+  done
+}
+
+##############################################################################
+extract_target_urls_from_oai_files() {
+  #extract_target_urls_from_oai_ListRecords_files
+  extract_target_urls_from_oai_ListIdentifiers_files
 }
 
 ##############################################################################
@@ -105,7 +130,7 @@ delete_oai_files	# Ensure no unwanted files influence results
 cd_exit_on_error "$temp_dir"
 
 # Write each OAI-PMH page to a file. Set of files = $fname_oai_pattern
-$HOME/opt/get_oai_pages/bin/get_oai_pages.rb "$url_oai"
+$GET_OAI_PAGES_EXE "$url_oai" 2>&1
 
 echo "Creating sitemap: $fname_dest_sitemap"
 create_sitemap |gzip -c - > "$fname_dest_sitemap"

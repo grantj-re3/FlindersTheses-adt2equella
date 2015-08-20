@@ -1,0 +1,7 @@
+PURPOSE
+
+- To create a sitemap file (as per http://www.sitemaps.org/protocol.html) based
+  on target URLs in an OAI-PMH harvest.
+
+- To be suitable to run as a cron job.
+

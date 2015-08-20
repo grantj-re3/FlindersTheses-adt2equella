@@ -17,7 +17,8 @@
 # - only after all is ok, uncomment the 'rm' command
 #
 # Creates a sitemap file (as per http://www.sitemaps.org/protocol.html) based
-# on target URLs in an OAI-PMH harvest. Suitable for running as a cron job.
+# on target URLs in an OAI-PMH harvest. Suitable for running as a cron job. Eg.
+#   15 19 * * * $HOME/bin/oai2sitemap.sh >/dev/null
 #
 # Sitemap file limits:
 # - 50,000 URLs max

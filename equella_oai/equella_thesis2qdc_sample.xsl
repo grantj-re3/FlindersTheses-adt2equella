@@ -289,12 +289,9 @@
 
   <!-- dc:subject (discipline) -->
   <xsl:template match="subjects/subject">
-    <xsl:call-template name="split_into_elements">
-      <xsl:with-param name="string" select="." />
-      <xsl:with-param name="element_name" select="'dc:subject'" />
-      <xsl:with-param name="element_value_prefix" select="'Subject discipline:'" />
-      <xsl:with-param name="delim" select="','" />
-    </xsl:call-template>
+    <dc:subject>
+      <xsl:value-of select="concat('Subject discipline:', .)" />
+    </dc:subject>
   </xsl:template>
 
   <!-- dc:type -->

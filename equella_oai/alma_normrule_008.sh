@@ -11,7 +11,7 @@
 #   normalization rule file.
 #
 ##############################################################################
-YEAR_BEGIN=1960			# Begin year (inclusive); format YYYY
+YEAR_BEGIN=1966			# Begin year (inclusive); format YYYY
 YEAR_END=2040			# End year (inclusive); format YYYY
 
 yyyy=$YEAR_BEGIN

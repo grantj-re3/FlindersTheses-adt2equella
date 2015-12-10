@@ -105,30 +105,16 @@ end
 This rule must appear after the subject-discipline rule which creates 695.a
 
 ```
-rule "Equella thesis - add 695.d for Doctor of Philosophy"
+rule "Equella thesis - add 695.d.Doctorate"
   when
-    (exists "024.a.flex-*") AND (exists "695.a.* thesis") AND (exists "655.a.Doctor of Philosophy")
+    (exists "024.a.flex-*") AND (exists "695.a.* thesis") AND (exists "655.a.Doctor of Philosophy|Professional Doctorate")
   then
     AddSubfield "695.d.Doctorate" if (not exists "695.d")
 end
 
-rule "Equella thesis - add 695.d for Professional Doctorate"
+rule "Equella thesis - add 695.d.Masters"
   when
-    (exists "024.a.flex-*") AND (exists "695.a.* thesis") AND (exists "655.a.Professional Doctorate")
-  then
-    AddSubfield "695.d.Doctorate" if (not exists "695.d")
-end
-
-rule "Equella thesis - add 695.d for Masters by Research"
-  when
-    (exists "024.a.flex-*") AND (exists "695.a.* thesis") AND (exists "655.a.Masters by Research")
-  then
-    AddSubfield "695.d.Masters" if (not exists "695.d")
-end
-
-rule "Equella thesis - add 695.d for Masters by Coursework"
-  when
-    (exists "024.a.flex-*") AND (exists "695.a.* thesis") AND (exists "655.a.Masters by Coursework")
+    (exists "024.a.flex-*") AND (exists "695.a.* thesis") AND (exists "655.a.Masters by Research|Masters by Coursework")
   then
     AddSubfield "695.d.Masters" if (not exists "695.d")
 end

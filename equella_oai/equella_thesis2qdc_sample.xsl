@@ -26,7 +26,7 @@
   <xsl:variable name="debug_element_name" select="'dc:coverage'" />
 
   <xsl:variable name="today" select="substring(date:date-time(),1,10)" />
-  <xsl:variable name="target_url_prefix" select="'http://www.flinders.edu.au/theses/'" />
+  <xsl:variable name="target_url_prefix" select="'https://theses.flinders.edu.au/view/'" />
   <xsl:variable name="identifier_prefix" select="'flex-'" />
   <xsl:variable name="rights_statement" 
     select="'This electronic version is (or will be) made publicly available by Flinders University in accordance with its open access policy for student theses. Copyright in this thesis remains with the author. This thesis may incorporate third party material which has been used by the author pursuant to Fair Dealing exceptions. If you are the owner of any included third party copyright material and/or you believe that any material has been made available without permission of the copyright owner please contact copyright@flinders.edu.au with the details'"

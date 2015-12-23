@@ -238,6 +238,6 @@ Allow Primo to link through to URLs in Equella
   * Verify that Target Field "LinkingParameter1" is mapped to Source Field "header:identifier"
 - Part 3 - Delivery tab
   * Repository Name: Equella Repository
-  * Object Template: http://www.flinders.edu.au/theses/$$LinkingParameter1
+  * Object Template: https://theses.flinders.edu.au/view/$$LinkingParameter1
   * Thumbnail Template: -
 

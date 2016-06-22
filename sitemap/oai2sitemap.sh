@@ -16,8 +16,12 @@
 #   temporary files to be deleted
 # - only after all is ok, uncomment the 'rm' command
 #
-# Creates a sitemap file (as per http://www.sitemaps.org/protocol.html) based
-# on target URLs in an OAI-PMH harvest. Suitable for running as a cron job. Eg.
+# Based on metadata from an OAI-PMH harvest, this program:
+# - creates a sitemap file (as per http://www.sitemaps.org/protocol.html) 
+# - creates an HTML summary page for Google Scholar (consisting of item
+#   date, title and URL)
+#
+# Suitable for running as a cron job. Eg.
 #   15 19 * * * $HOME/bin/oai2sitemap.sh >/dev/null
 #
 # Sitemap file limits:
@@ -32,15 +36,13 @@
 # extract_target_urls_from_oai_files().
 
 PATH=/bin:/usr/bin:/usr/local/bin;	export PATH
+app=`basename $0 .sh`
 
 GET_OAI_PAGES_EXE="$HOME/opt/get_oai_pages/bin/get_oai_pages.rb"
 
 # Initial URL of the OAI-PMH provider
-#url_oai="http://oai_repo_host/mypath/oai?verb=ListRecords&metadataPrefix=oai_qdc_rhd&set=xxxx"
-url_oai="http://oai_repo_host/mypath/oai?verb=ListIdentifiers&metadataPrefix=oai_qdc_rhd&set=xxxx"
-
-# Sitemap destination filename
-fname_dest_sitemap="/my/sitemap/path/sitemap.xml.gz"
+url_oai="http://oai_repo_host/mypath/oai?verb=ListRecords&metadataPrefix=oai_qdc_rhd&set=xxxx"
+#url_oai="http://oai_repo_host/mypath/oai?verb=ListIdentifiers&metadataPrefix=oai_qdc_rhd&set=xxxx"
 
 # Assumes harvested URLs all have same web host & path
 target_url_prefix="https://target_host/view/"
@@ -49,6 +51,17 @@ target_url_prefix="https://target_host/view/"
 # Pattern must NOT contain white space.
 temp_dir="/my/sitemap/temp/dir"
 fname_oai_pattern="$temp_dir/oai_page_[0-9][0-9][0-9][0-9].xml"
+
+# Destination filenames
+fname_dest_sitemap="/my/sitemap/path/sitemap.xml.gz"
+fname_dest_html_summary="/my/sitemap/path/thesis_summary.html"
+log="$HOME/opt/get_oai_pages/log/$app.log"
+
+# Space separated email list (for mailx)
+dest_email_list="me@example.com you@example.com"
+
+oai_recs_per_page=10		# Expected OAI-PMH records per page (except for last page)
+datestamp=`date '+%F %T %z'`
 
 ##############################################################################
 # Change directory. Exit if unable to change directory.
@@ -125,16 +138,111 @@ create_sitemap() {
 }
 
 ##############################################################################
+# Create HTML summary for Google Scholar. Write HTML to STDOUT
+create_google_scholar_html_summary() {
+  cat <<-END_HTML1
+	<html>
+	  <head>
+	    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
+	    <title>Flinders University - Thesis list</title>
+	  </head>
+	  <body>
+	    <h1>Flinders University - Thesis list</h1>
+	    <ul>
+`
+create_google_scholar_html_summary_records |ruby -e '
+  # Sort by date-string (usually YYYY) then (case insensitive) title-string
+  #   MatchData[0] = Whole line. Eg. <li>Date: 2016; Title: <a href="https://...">My thesis title</a></li>
+  #   MatchData[1] = Date string
+  #   MatchData[2] = Title string
+  regex = /^.*>Date: *(.*); *Title: *<a[^>]*>(.*)<\/a>.*$/
+  readlines.				# Array of lines
+  map{|line| line.match(regex)}.	# Array of MatchData (1 per line)
+  sort{|a,b| a[1]==b[1] ? a[2].casecmp(b[2]) : a[1]<=>b[1]}.	# Sorted array of MatchData
+  each{|matchdata| puts matchdata[0]}'
+`
+	    </ul>
+	    <hr/>
+	    <p>Page last updated: $datestamp</p>
+	  </body>
+	</html>
+	END_HTML1
+}
+
+##############################################################################
+# Create HTML summary records for Google Scholar. Write HTML to STDOUT
+create_google_scholar_html_summary_records() {
+  for fname in $fname_oai_pattern; do
+    awk -v fname=$fname -v recs_pp=$oai_recs_per_page '
+      /<dc:title>.*<\/dc.title>/ {
+        # No need to translate from "<",">" to "&lt","&gt" as OAI-PMH
+        # source text is already XML
+        title = gensub(/<\/?dc:title>/, "", "g")
+      } 
+
+      /<dc:date>.*<\/dc.date>/ {
+        date = gensub(/<\/?dc:date>/, "", "g")
+      } 
+
+      /<dc:identifier type=\"dcterms:URI\">.*<\/dc:identifier>/ {
+        url = gensub(/<\/?dc:identifier( type=\"dcterms:URI\")?>/, "", "g")
+      }
+
+      # We have reached the end of this OAI-PMH record
+      /<\/record>/ {
+        if(url != "" && title != "" && date != "") {
+          # If you change the HTML format of the line below, you
+          # may need to make corresponding changes to the sort in
+          # function create_google_scholar_html_summary()
+          printf "<li>Date: %s; Title: <a href=\"%s\">%s</a></li>\n", date, url, title
+          line_out_count += 1
+        } else {
+          printf "WARNING, omitting record with empty field. [Date:%s|URL:%s|Title:%s]\n", date, url, title > "/dev/stderr"
+        }
+        url = ""
+        title = ""
+        date = ""
+      }
+
+      # We have reached the end of this OAI-PMH page of records
+      END {
+        if(line_out_count != recs_pp)	# Should only occur for last OAI-PMH page
+          printf "INFO: URL count: %d; Filename: \"%s\"\n", line_out_count, fname > "/dev/stderr"
+      }
+    ' $fname
+  done
+}
+
+##############################################################################
+show_stats() {
+  echo "INFO: Expected number of OAI-PMH records per page: $oai_recs_per_page" >&2
+  oai_pages=`ls -1 $fname_oai_pattern 2>/dev/null |wc -l`
+  echo "INFO: Number of OAI-PMH pages: $oai_pages" >&2
+  num_recs=`egrep -c "<li>.*Title:" $fname_dest_html_summary`
+  echo "INFO: Actual total HTML-summary records: $num_recs" >&2
+}
+
+##############################################################################
 # main()
 ##############################################################################
 delete_oai_files	# Ensure no unwanted files influence results
 cd_exit_on_error "$temp_dir"
 
 # Write each OAI-PMH page to a file. Set of files = $fname_oai_pattern
+# - To omit email, comment out mailx command. Eg. ...|tee $log # |mailx ...
+# - To omit logging and email, comment out tee command.
+#   Eg. ... 2>&1 # |tee $log ...
 $GET_OAI_PAGES_EXE "$url_oai" 2>&1
+{
+  echo "INFO: Start datestamp: $datestamp" >&2
+  echo "Creating sitemap: $fname_dest_sitemap"
+  create_sitemap |gzip -c - > "$fname_dest_sitemap"
 
-echo "Creating sitemap: $fname_dest_sitemap"
-create_sitemap |gzip -c - > "$fname_dest_sitemap"
+  echo "Creating HTML summary for Google Scholar: $fname_dest_html_summary"
+  create_google_scholar_html_summary > $fname_dest_html_summary
+  show_stats
+} 2>&1 |tee $log |mailx -s "$app.log" $dest_email_list
+
 delete_oai_files	# Clean up temporary files
 exit 0
 

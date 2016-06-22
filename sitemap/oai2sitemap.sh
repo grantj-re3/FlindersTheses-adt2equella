@@ -174,11 +174,21 @@ create_google_scholar_html_summary_records |ruby -e '
 create_google_scholar_html_summary_records() {
   for fname in $fname_oai_pattern; do
     awk -v fname=$fname -v recs_pp=$oai_recs_per_page '
-      /<dc:title>.*<\/dc.title>/ {
-        # No need to translate from "<",">" to "&lt","&gt" as OAI-PMH
-        # source text is already XML
-        title = gensub(/<\/?dc:title>/, "", "g")
-      } 
+      # Assumes multi-line dc:title tags contain no other tags or white
+      # space on the same line (as if passed through "xmllint --format"). Eg.
+      # <dc:title> ...
+      #   ...
+      #   ... </dc.title>
+      ismore == "t" || /<dc:title>/ {
+        # No need to translate from ["<",">"] to ["&lt","&gt"] as OAI-PMH source text is already XML
+        title = title gensub(/<\/?dc:title>/, "", "g") " "  # Append space to every line of dc:title input
+
+        if(/<\/dc.title>/) {
+          ismore = ""		# Last line of the dc.title tag
+        } else {
+          ismore = "t"		# There are more lines for this dc.title tag
+        }
+      }
 
       /<dc:date>.*<\/dc.date>/ {
         date = gensub(/<\/?dc:date>/, "", "g")

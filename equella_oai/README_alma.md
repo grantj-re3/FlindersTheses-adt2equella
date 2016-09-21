@@ -203,6 +203,24 @@ rule "Equella thesis - fix 655 indicators"
 end
 ```
 
+### Normalization rule to show collection
+
+```
+rule "Add 490 Electronic thesis collection"
+salience 100
+  when
+    (TRUE)
+  then
+   addField "490.{1,-}.a.Electronic thesis collection" if (not exists "Electronic thesis collection")
+end
+rule "Add 830 Electronic thesis collection"
+salience 100
+  when
+    (TRUE)
+  then
+   addField "830.{-,0}.a.Electronic thesis collection" if (not exists "Electronic thesis collection")
+end
+```
 
 ## Create a normalization rule process
 

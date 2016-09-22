@@ -22,7 +22,13 @@
           </coord>
         </coords>
       </people>
-      <thesis type="Doctor of Philoshophy">
+      <thesis
+        collection_type="RHD"
+        degree_type="Research Higher Degree"
+        marc_type="Doctorate"
+        selected_type="Doctor of Philosophy"
+        type="Doctor of Philosophy"
+      >
         <version>
           <abstract>
             <text>TEST My abstract</text>

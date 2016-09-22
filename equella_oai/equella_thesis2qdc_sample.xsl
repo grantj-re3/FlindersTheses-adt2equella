@@ -144,9 +144,11 @@
       <xsl:when test="$is_live and $will_be_open_access">
         <xsl:apply-templates select="/xml/item/@id" />
         <xsl:apply-templates select="/xml/item/curriculum/thesis/@type" />
+        <xsl:apply-templates select="/xml/item/curriculum/thesis/@marc_type" />
         <xsl:apply-templates select="/xml/item/curriculum/people/students/student" />
 
         <xsl:apply-templates select="/xml/item/curriculum/thesis/version/abstract/text" />
+        <xsl:apply-templates select="/xml/item/curriculum/thesis/@degree_type" />
         <xsl:apply-templates select="/xml/item/curriculum/thesis/*[name()!='release']" />
         <xsl:apply-templates select="/xml/item/curriculum/thesis/keywords/keyword" />
         <xsl:apply-templates select="/xml/item/curriculum/thesis/subjects/subject" />
@@ -252,9 +254,14 @@
 
   </xsl:template>
 
-  <!-- dc:description -->
+  <!-- dc:description - first -->
   <xsl:template match="abstract/text">
     <dc:description> <xsl:value-of select="." /> </dc:description>
+  </xsl:template>
+
+  <!-- dc:description - second -->
+  <xsl:template match="thesis/@degree_type">
+    <dc:description> <xsl:value-of select="concat('(', ., ')')" /> </dc:description>
   </xsl:template>
 
   <!-- 2x dc:identifier -->
@@ -294,9 +301,14 @@
     </dc:subject>
   </xsl:template>
 
-  <!-- dc:type -->
+  <!-- dc:type - first -->
   <xsl:template match="thesis/@type">
     <dc:type> <xsl:value-of select="." /> </dc:type>
+  </xsl:template>
+
+  <!-- dc:type - second -->
+  <xsl:template match="thesis/@marc_type">
+    <dc:type> <xsl:value-of select="concat('Thesis (', ., ')')" /> </dc:type>
   </xsl:template>
 
 </xsl:stylesheet>

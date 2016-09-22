@@ -107,16 +107,30 @@ This rule must appear after the subject-discipline rule which creates 695.a
 ```
 rule "Equella thesis - add 695.d.Doctorate"
   when
-    (exists "024.a.flex-*") AND (exists "695.a.* thesis") AND (exists "655.a.Doctor of Philosophy|Professional Doctorate")
+    (exists "024.a.flex-*") AND (exists "695.a.* thesis") AND (exists "655.a.Thesis (Doctorate)")
   then
     AddSubfield "695.d.Doctorate" if (not exists "695.d")
 end
 
 rule "Equella thesis - add 695.d.Masters"
   when
-    (exists "024.a.flex-*") AND (exists "695.a.* thesis") AND (exists "655.a.Masters by Research|Masters by Coursework")
+    (exists "024.a.flex-*") AND (exists "695.a.* thesis") AND (exists "655.a.Thesis (Masters)")
   then
     AddSubfield "695.d.Masters" if (not exists "695.d")
+end
+
+rule "Equella thesis - add 695.d.Diploma"
+  when
+    (exists "024.a.flex-*") AND (exists "695.a.* thesis") AND (exists "655.a.Thesis (Diploma)")
+  then
+    AddSubfield "695.d.Diploma" if (not exists "695.d")
+end
+
+rule "Equella thesis - add 695.d.Honours"
+  when
+    (exists "024.a.flex-*") AND (exists "695.a.* thesis") AND (exists "655.a.Thesis (Honours)")
+  then
+    AddSubfield "695.d.Honours" if (not exists "695.d")
 end
 ```
 
@@ -187,6 +201,17 @@ rule "Equella thesis - move 307.a to 263.a"
     exists "024.a.flex-*"
   then
     changeField "307" to "263" if (exists "307.a")
+end
+```
+
+### Normalization rule for degree-type
+
+```
+rule "Equella thesis - move 520.a to 500.a if degree-type"
+  when
+    exists "024.a.flex-*"
+  then
+    changeField "520" to "500" if (exists "520.a.(Research Higher Degree)|(Coursework)|(Honours)")
 end
 ```
 

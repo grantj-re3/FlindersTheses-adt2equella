@@ -228,6 +228,26 @@ rule "Equella thesis - add 695.d.Honours"
 end
 ```
 
+### Normalization rule to show type of Masters degree
+
+This rule must appear after the subject-discipline rule which creates 695.a
+
+```
+rule "Equella thesis - modify 655.a for Masters by Research"
+  when
+    (exists "024.a.flex-*") AND (exists "695.a.* thesis") AND (exists "500.a.(Research Higher Degree)") 
+  then
+	ReplaceContents "655.a.Masters" with "Masters by Research" if (exists "655.a.Masters")
+end
+
+rule "Equella thesis - modify 655.a for Masters by Coursework"
+  when
+    (exists "024.a.flex-*") AND (exists "695.a.* thesis") AND (exists "500.a.(Coursework)") 
+  then
+	ReplaceContents "655.a.Masters" with "Masters by Coursework" if (exists "655.a.Masters")
+end
+```
+
 ### Normalization rule to show collection
 
 ```

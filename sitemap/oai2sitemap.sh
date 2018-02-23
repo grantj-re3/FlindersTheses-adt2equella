@@ -59,6 +59,7 @@ log="$HOME/opt/get_oai_pages/log/$app.log"
 
 # Space separated email list (for mailx)
 dest_email_list="me@example.com you@example.com"
+email_subject="Thesis - create Google Scholar browse interface: $app.log"
 
 oai_recs_per_page=10		# Expected OAI-PMH records per page (except for last page)
 datestamp=`date '+%F %T %z'`
@@ -141,32 +142,58 @@ create_sitemap() {
 # Create HTML summary for Google Scholar. Write HTML to STDOUT
 create_google_scholar_html_summary() {
   cat <<-END_HTML1
-	<html>
-	  <head>
-	    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
-	    <title>Flinders University - Thesis list</title>
-	  </head>
-	  <body>
-	    <h1>Flinders University - Thesis list</h1>
-	    <ul>
-`
-create_google_scholar_html_summary_records |ruby -e '
-  # Sort by date-string (usually YYYY) then (case insensitive) title-string
-  #   MatchData[0] = Whole line. Eg. <li>Date: 2016; Title: <a href="https://...">My thesis title</a></li>
-  #   MatchData[1] = Date string
-  #   MatchData[2] = Title string
-  regex = /^.*>Date: *(.*); *Title: *<a[^>]*>(.*)<\/a>.*$/
-  readlines.				# Array of lines
-  map{|line| line.match(regex)}.	# Array of MatchData (1 per line)
-  sort{|a,b| a[1]==b[1] ? a[2].casecmp(b[2]) : a[1]<=>b[1]}.	# Sorted array of MatchData
-  each{|matchdata| puts matchdata[0]}'
-`
-	    </ul>
-	    <hr/>
-	    <p>Page last updated: $datestamp</p>
-	  </body>
+	<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+	<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+	  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	  <title>Flinders University - Thesis list (digital)</title>
+	  <link media="screen" rel="stylesheet" href="styles/style.css" type="text/css"/> 
+	  <link media="screen" rel="stylesheet" href="http://www.flinders.edu.au/flinders/app_templates/flinderstemplates/tmp_flin_base_v2.css" type="text/css"/> 
+	  <link media="screen" rel="stylesheet" href="styles/directory.css" type="text/css"/> 
+	</head>
+
+	<body>
+	  <div id="container">
+	    <div id="header">
+	      <a href="http://flinders.edu.au/"><img src="styles/images/flinders-university.png" width="181" height="67" alt="Flinders University" longdesc="http://flinders.edu.au/" class="logo" /></a>
+	    </div>
+
+	    <div id="main-content">
+	      <h1>Flinders University - Thesis list (digital)</h1>
+	      <hr>
+
+	      <ul>
+`create_google_scholar_html_summary_records_sorted`
+	      </ul>
+
+	    </div>
+	    <div id="footer">
+	      <p class="cricos">CRICOS No.00114A</p>
+	      <img src="styles/images/inspiring_achievement.png" width="172" height="18" alt="inspiring achievement" />
+	    </div>
+	    <p/><p><small>Last updated: $datestamp</small></p>
+	  </div>
+	</body>
 	</html>
 	END_HTML1
+}
+
+##############################################################################
+create_google_scholar_html_summary_records_sorted() {
+  create_google_scholar_html_summary_records |
+    ruby -e '
+      # Sort by date-string (usually YYYY) then (case insensitive) title-string
+      #   MatchData[0] = Whole line. Eg. <li>Date: 2016; Title: <a href="https://...">My thesis title</a></li>
+      #   MatchData[1] = Date string
+      #   MatchData[2] = Title string
+      regex = /^.*>Date: *(.*); *Title: *<a[^>]*>(.*)<\/a>.*$/
+      readlines.			# Array of lines
+      map{|line| line.match(regex)}.	# Array of MatchData (1 per line)
+      sort{|a,b|
+        a[1]==b[1] ? a[2].casecmp(b[2]) : a[1]<=>b[1]
+      }.				# Sorted array of MatchData
+      each{|matchdata| puts matchdata[0]}
+    '
 }
 
 ##############################################################################
@@ -180,8 +207,10 @@ create_google_scholar_html_summary_records() {
       #   ...
       #   ... </dc.title>
       ismore == "t" || /<dc:title>/ {
-        # No need to translate from ["<",">"] to ["&lt","&gt"] as OAI-PMH source text is already XML
-        title = title gensub(/<\/?dc:title>/, "", "g") " "  # Append space to every line of dc:title input
+        # Append space to the end of every XML dc:title line.
+        # No need to translate from ["<",">"] to ["&lt","&gt"] as OAI-PMH
+        # source text is already XML.
+        title = title gensub(/<\/?dc:title>/, "", "g") " "
 
         if(/<\/dc.title>/) {
           ismore = ""		# Last line of the dc.title tag
@@ -251,7 +280,7 @@ $GET_OAI_PAGES_EXE "$url_oai" 2>&1
   echo "Creating HTML summary for Google Scholar: $fname_dest_html_summary"
   create_google_scholar_html_summary > $fname_dest_html_summary
   show_stats
-} 2>&1 |tee $log |mailx -s "$app.log" $dest_email_list
+} 2>&1 |tee $log |mailx -s "$email_subject" $dest_email_list
 
 delete_oai_files	# Clean up temporary files
 exit 0

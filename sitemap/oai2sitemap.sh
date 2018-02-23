@@ -1,8 +1,8 @@
 #!/bin/sh
 # oai2sitemap.sh
 #
-# Copyright (c) 2015, Flinders University, South Australia. All rights reserved.
-# Contributors: Library, Information Services, Flinders University.
+# Copyright (c) 2015-2018, Flinders University, South Australia. All rights reserved.
+# Contributors: Library, Corporate Services, Flinders University.
 # See the accompanying LICENSE file (or http://opensource.org/licenses/BSD-3-Clause).
 #
 # BEWARE:
@@ -38,27 +38,28 @@
 PATH=/bin:/usr/bin:/usr/local/bin;	export PATH
 app=`basename $0 .sh`
 
-GET_OAI_PAGES_EXE="$HOME/opt/get_oai_pages/bin/get_oai_pages.rb"
+GET_OAI_PAGES_EXE="$HOME/opt/get_oai_pages/bin/get_oai_pages.rb"	# CUSTOMISE
 
 # Initial URL of the OAI-PMH provider
+# CUSTOMISE
 url_oai="http://oai_repo_host/mypath/oai?verb=ListRecords&metadataPrefix=oai_qdc_rhd&set=xxxx"
 #url_oai="http://oai_repo_host/mypath/oai?verb=ListIdentifiers&metadataPrefix=oai_qdc_rhd&set=xxxx"
 
 # Assumes harvested URLs all have same web host & path
-target_url_prefix="https://target_host/view/"
+target_url_prefix="https://target_host/view/"				# CUSTOMISE
 
 # Strongly recommend using absolute paths as matching files will be deleted.
 # Pattern must NOT contain white space.
-temp_dir="/my/sitemap/temp/dir"
+temp_dir="/my/sitemap/temp/dir"						# CUSTOMISE
 fname_oai_pattern="$temp_dir/oai_page_[0-9][0-9][0-9][0-9].xml"
 
 # Destination filenames
-fname_dest_sitemap="/my/sitemap/path/sitemap.xml.gz"
-fname_dest_html_summary="/my/sitemap/path/thesis_summary.html"
-log="$HOME/opt/get_oai_pages/log/$app.log"
+fname_dest_sitemap="/my/sitemap/path/sitemap.xml.gz"			# CUSTOMISE
+fname_dest_html_summary="/my/sitemap/path/thesis_summary.html"		# CUSTOMISE
+log="$HOME/opt/get_oai_pages/log/$app.log"				# CUSTOMISE
 
 # Space separated email list (for mailx)
-dest_email_list="me@example.com you@example.com"
+dest_email_list="me@example.com you@example.com"			# CUSTOMISE
 email_subject="Thesis - create Google Scholar browse interface: $app.log"
 
 oai_recs_per_page=10		# Expected OAI-PMH records per page (except for last page)
@@ -257,8 +258,13 @@ show_stats() {
   echo "INFO: Expected number of OAI-PMH records per page: $oai_recs_per_page" >&2
   oai_pages=`ls -1 $fname_oai_pattern 2>/dev/null |wc -l`
   echo "INFO: Number of OAI-PMH pages: $oai_pages" >&2
+
+  num_recs_exp_max=`expr $oai_pages \* $oai_recs_per_page`
+  num_recs_exp_min=`expr $num_recs_exp_max - $oai_recs_per_page + 1`
+  echo "INFO: Expected total HTML-summary records: $num_recs_exp_min-$num_recs_exp_max" >&2
+
   num_recs=`egrep -c "<li>.*Title:" $fname_dest_html_summary`
-  echo "INFO: Actual total HTML-summary records: $num_recs" >&2
+  echo "INFO: Actual total HTML-summary records:   $num_recs" >&2
 }
 
 ##############################################################################
@@ -274,12 +280,19 @@ cd_exit_on_error "$temp_dir"
 $GET_OAI_PAGES_EXE "$url_oai" 2>&1
 {
   echo "INFO: Start datestamp: $datestamp" >&2
-  echo "Creating sitemap: $fname_dest_sitemap"
-  create_sitemap |gzip -c - > "$fname_dest_sitemap"
 
-  echo "Creating HTML summary for Google Scholar: $fname_dest_html_summary"
-  create_google_scholar_html_summary > $fname_dest_html_summary
-  show_stats
+  ls -1 $fname_oai_pattern >/dev/null 2>&1	# Did we download OAI-PMH pages?
+  if [ $? = 0 ]; then
+    echo "Creating sitemap: $fname_dest_sitemap"
+    create_sitemap |gzip -c - > "$fname_dest_sitemap"
+
+    echo "Creating HTML summary for Google Scholar: $fname_dest_html_summary"
+    create_google_scholar_html_summary > $fname_dest_html_summary
+    show_stats
+
+  else
+    echo "ERROR: No OAI-PMH page-files found" >&2
+  fi
 } 2>&1 |tee $log |mailx -s "$email_subject" $dest_email_list
 
 delete_oai_files	# Clean up temporary files

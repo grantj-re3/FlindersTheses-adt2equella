@@ -29,7 +29,7 @@
   <xsl:variable name="target_url_prefix" select="'https://theses.flinders.edu.au/view/'" />
   <xsl:variable name="identifier_prefix" select="'flex-'" />
   <xsl:variable name="rights_statement" 
-    select="'This electronic version is (or will be) made publicly available by Flinders University in accordance with its open access policy for student theses. Copyright in this thesis remains with the author. This thesis may incorporate third party material which has been used by the author pursuant to Fair Dealing exceptions. If you are the owner of any included third party copyright material and/or you believe that any material has been made available without permission of the copyright owner please contact copyright@flinders.edu.au with the details'"
+    select="'This electronic version is (or will be) made publicly available by Flinders University in accordance with its open access policy for student theses. Copyright in this thesis remains with the author. You may use this material for uses permitted under the Copyright Act 1968. If you are the owner of any included third party copyright material and/or you believe that any material has been made available without permission of the copyright owner please contact copyright@flinders.edu.au with the details.'"
   />
 
   <xsl:variable name="access_restrictions_note_marc506_a" 

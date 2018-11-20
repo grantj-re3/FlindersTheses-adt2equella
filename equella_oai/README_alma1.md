@@ -1,4 +1,4 @@
-# Alma configuration
+# Alma configuration - Part 1
 
 
 ## Create an Import Profile for a Digital profile-type
@@ -124,19 +124,6 @@ rule "Equella thesis - Add 008 for year 2040"
 end
 ```
 
-### Normalization rule to fix 655 indicators
-
-```
-rule "Equella thesis - fix 655 indicators"
-  when
-    exists "024.a.flex-*"
-  then
-    changeFirstIndicator  "655" to " " if (exists "655.a")
-    changeSecondIndicator "655" to "4" if (exists "655.a")
-    removeSubField "655.2" if (exists "655.a")
-end
-```
-
 ### Normalization rule for target URL
 
 ```
@@ -196,9 +183,8 @@ end
 
 ### Normalization rule-file for adding 695.d
 
-This rule must appear after the subject-discipline rule which creates 695.a
-
 ```
+# This rule must appear after the subject-discipline rule which creates 695.a
 rule "Equella thesis - add 695.d.Doctorate"
   when
     (exists "024.a.flex-*") AND (exists "695.a.* thesis") AND (exists "655.a.Thesis (Doctorate)")
@@ -228,11 +214,10 @@ rule "Equella thesis - add 695.d.Honours"
 end
 ```
 
-### Normalization rule to show type of Masters degree
-
-This rule must appear after the subject-discipline rule which creates 695.a
+### Normalization rule-file to show type of Masters degree
 
 ```
+# This rule must appear after the subject-discipline rule which creates 695.a
 rule "Equella thesis - modify 655.a for Masters by Research"
   when
     (exists "024.a.flex-*") AND (exists "695.a.* thesis") AND (exists "500.a.(Research Higher Degree)") 
@@ -248,22 +233,47 @@ rule "Equella thesis - modify 655.a for Masters by Coursework"
 end
 ```
 
-### Normalization rule to show collection
+### Normalization rule to merge 2x 655 into a single 502
 
 ```
-rule "Add 490 Electronic thesis collection"
-salience 100
+# This rule must appear after the rule-file which tests 655 (during the creation of 695.d).
+# This rule must appear after the rule-file which modifies 655.a for Masters theses.
+rule "Equella thesis - move 2x 655 to 502 then merge"
   when
-    (TRUE)
+    (exists "024.a.flex-*") AND (exists "695.a.* thesis") AND (exists "655.a.Thesis (*")
   then
-   addField "490.{1,-}.a.Electronic thesis collection" if (not exists "Electronic thesis collection")
+    changeField "655" to "502"
+    changeSubField "502.a" to "g" if (exists "502.a.Thesis (*")
+    combineFields "502" excluding ""
+    suffix "502.a" with ", " if (exists "502.a.*")
+    suffixSubField "502.a" with "502.g"
+    removeSubField "502.g"
+    removeSubField "502.2"
+    changeFirstIndicator  "502" to " "
+    changeSecondIndicator "502" to " "
 end
-rule "Add 830 Electronic thesis collection"
-salience 100
+```
+
+### Normalization rule to move 720 to 100; then add 3xx fields
+
+```
+rule "Equella thesis - move 720 to 100; add 3xx"
   when
-    (TRUE)
+    (exists "024.a.flex-*") AND (exists "695.a.* thesis") AND (not exists "100.e.author") AND (exists "720.e.author")
   then
-   addField "830.{-,0}.a.Electronic thesis collection" if (not exists "Electronic thesis collection")
+    # Move field 720 to 100
+    changeField "720" to "100"
+    changeFirstIndicator "100" to "1"
+    changeSecondIndicator "100" to " "
+
+    # Add fields 300a; 336a,b; 337a,b; 338a,b.
+    addField "300.a.1 online resource"
+    addField "336.a.text"
+    addSubField "336.b.txt"
+    addField "337.a.computer"
+    addSubField "337.b.c"
+    addField "338.a.online resource"
+    addSubField "338.b.cr"
 end
 ```
 

@@ -2,7 +2,8 @@
 
 ## Introduction
 
-After following *Alma configuration - Part 1* (which creates an
+After following *[Alma configuration - Part 1](README_alma1.md)*
+(which creates an
 Import Profile for a Digital profile-type) and running the
 associated Import Profile job, you should have a collection
 populated with bibliographic records which have *digital*
@@ -21,7 +22,7 @@ The high-level steps are as follows.
    Import Profile.  The Equella OAI-PMH metadata is in Qualified
    Dublin Core format and is crosswalked into MARC during the Alma
    import process. The configuration is covered in
-  [Alma configuration - Part 1](README_alma1.md).
+   *[Alma configuration - Part 1](README_alma1.md)*.
 2. Export MARC-XML bibliographic records from Alma to an
    institutional server via an (Alma FTP) Export Profile.
 3. Import MARC-XML bibliographic records from the institutional
@@ -31,7 +32,7 @@ The high-level steps are as follows.
 
 ## Create an Import Profile for a Repository profile-type
 - Alma/equella prerequisite: Follow the steps in
-  [Alma configuration - Part 1](README_alma1.md)
+  *[Alma configuration - Part 1](README_alma1.md)*
 - Alma prerequisite: Create an electronic collection,
   *Flinders Digital Theses* (FIXME: provide the configuration)
 - Alma prerequisite: Create an export profile for thesis
@@ -43,21 +44,25 @@ The high-level steps are as follows.
 - Part 1 - Profile Details
   * Profile name: Electronic Thesis Collection - Step 3 - Import 2
   * Profile description: Load previously exported MARC-XML bib records to create portfolios for existing bib records
-  * Originating system: [Equella - Flinders]
+  * Originating system: [Equella - Flinders] (FIXME: provide the configuration)
   * Import protocol: [FTP]
   * Physical source format: [XML]
   * Source format: [MARC21 Bibliographic]
   * Status: Active
   * File name patterns: -
-  * Cross walk: [Uncheck]
+  * Cross walk: [No]
   * Target format: MARC21 Bibliographic
+  * Scheduling: As required
+  * FTP Information: As required
+  * Click Next
 - Part 2 - Normalization & Validation
-  * Filter out the data using: -
-  * Correct the data using: -
-  * Handle invalid data using: MarcXML Bib Import
+  * Filter: Filter out the data using: -
+  * Normalization: Correct the data using: -
+  * Validation Exception Profile: Handle invalid data using: MarcXML Bib Import
+  * Click Next
 - Part 3 - Match Profile
   * Match Profile
-    + Match by Serial / Non Serial: [Check]
+    + Match by Serial / Non Serial: [Yes]
     + Serial match method: [001 To MMS_ID Match Method]
     + Non Serial match method: [001 To MMS_ID Match Method]
   * Match Actions
@@ -67,6 +72,7 @@ The high-level steps are as follows.
     + Select Action - Allow bibliographic record deletion: -
     + Select Action - Do not override/merge a record with lower brief version: -
     + Select Action - Unlink bibliographic records from community zone: -
+    + Do not override/ merge record with an older version: [Disabled]
   * Automatic Multi-Branch Handling
     + Select Action - Disregard matches for bibliographic CZ linked records: -
     + Select Action - Disregard invalid/canceled system control number identifiers: -
@@ -80,11 +86,13 @@ The high-level steps are as follows.
     + Update holdings call number: -
   * No Match
     + Upon no match: [Do Not Import]
+  * Click Next
 - Part 4 - Set Management Tags
   * Suppress record/s from publish/delivery: -
   * Synchronize with OCLC: [Don't publish]
   * Synchronize with Libraries Australia: [Publish Bibliographic records]
   * Condition: [Unconditionally]
+  * Click Next
 - Part 5 - Inventory Information
   * Inventory Operations: [Electronic]
   * E-Book Mapping
@@ -106,4 +114,5 @@ The high-level steps are as follows.
     + Default library: Central Library
     + License: -
     + Activate resource: [Check]
+  * Click Save
 

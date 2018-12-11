@@ -31,7 +31,15 @@
       >
         <version>
           <abstract>
-            <text>TEST My abstract</text>
+            <text>
+TEST
+
+My abstract.
+
+
+This abstract contains some newlines.
+
+</text>
             <uuid>85dfa196-d546-4f12-9739-067cf2698fd2</uuid>
           </abstract>
           <examined_thesis>

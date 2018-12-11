@@ -109,6 +109,95 @@
   </xsl:template>
 
   <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
+  <!-- Within $text, replace all instances of string $replace with string $by -->
+  <xsl:template name="string-replace-all">
+    <xsl:param name="text" />
+    <xsl:param name="replace" />
+    <xsl:param name="by" />
+
+    <xsl:choose>
+      <xsl:when test="$text = '' or $replace = '' or not($replace)" >
+        <xsl:value-of select="$text" />
+      </xsl:when>
+
+      <xsl:when test="contains($text, $replace)">
+        <xsl:value-of select="substring-before($text,$replace)" />
+        <xsl:value-of select="$by" />
+        <xsl:call-template name="string-replace-all">
+          <xsl:with-param name="text" select="substring-after($text,$replace)" />
+          <xsl:with-param name="replace" select="$replace" />
+          <xsl:with-param name="by" select="$by" />
+        </xsl:call-template>
+      </xsl:when>
+
+      <xsl:otherwise>
+        <xsl:value-of select="$text" />
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+
+  <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
+  <!-- Within $text, replace multiple consecutive instances of character $character with one $character -->
+  <xsl:template name="normalize-characters">
+    <xsl:param name="text"/>
+    <xsl:param name="character"/>
+
+    <xsl:variable name="char_x2" select="concat($character, $character)"/>
+    <xsl:choose>
+      <xsl:when test="contains($text, $char_x2)">
+        <xsl:call-template name="normalize-characters">
+          <xsl:with-param name="text" select="concat(substring-before($text, $char_x2), $character, substring-after($text, $char_x2))"/>
+          <xsl:with-param name="character" select="$character"/>
+        </xsl:call-template>
+      </xsl:when>
+
+      <xsl:otherwise>
+        <xsl:value-of select="$text"/>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+
+  <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
+  <!-- At the start of string $text, remove multiple consecutive instances of character $character -->
+  <xsl:template name="trim-left-characters">
+    <xsl:param name="text"/>
+    <xsl:param name="character"/>
+
+    <xsl:choose>
+      <xsl:when test="starts-with($text, $character)">
+        <xsl:call-template name="trim-left-characters">
+          <xsl:with-param name="text" select="substring($text, 2, string-length($text)-1)"/>
+          <xsl:with-param name="character" select="$character"/>
+        </xsl:call-template>
+      </xsl:when>
+
+      <xsl:otherwise>
+        <xsl:value-of select="$text"/>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+
+  <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
+  <!-- At the end of string $text, remove multiple consecutive instances of character $character -->
+  <xsl:template name="trim-right-characters">
+    <xsl:param name="text"/>
+    <xsl:param name="character"/>
+
+    <xsl:choose>
+      <xsl:when test="substring($text, string-length($text), 1)=$character">
+        <xsl:call-template name="trim-right-characters">
+          <xsl:with-param name="text" select="substring($text, 1, string-length($text)-1)"/>
+          <xsl:with-param name="character" select="$character"/>
+        </xsl:call-template>
+      </xsl:when>
+
+      <xsl:otherwise>
+        <xsl:value-of select="$text"/>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+
+  <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
   <!-- TEMPLATES -->
   <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
 
@@ -255,8 +344,47 @@
   </xsl:template>
 
   <!-- dc:description - first -->
+  <!-- These fields are crosswalked from Qualified DC to MARC later in
+       the workflow & Libraries Australia says line feed & carriage
+       return characters must not appear within MARC fields
+  -->
   <xsl:template match="abstract/text">
-    <dc:description> <xsl:value-of select="." /> </dc:description>
+    <xsl:variable name="char_lf" select="'&#10;'"/>
+    <xsl:variable name="char_cr" select="'&#13;'"/>
+    <xsl:variable name="s_newline_substitute" select="' -- '"/>
+
+    <!-- Replace consecutive CR/LF chars with a single LF char -->
+    <xsl:variable name="abstract_norm_newlines">
+      <xsl:call-template name="normalize-characters">
+        <xsl:with-param name="text" select="translate(., $char_cr, $char_lf)"/>
+        <xsl:with-param name="character" select="$char_lf"/>
+      </xsl:call-template>
+    </xsl:variable>
+
+    <!-- Trim LFs from left end of string -->
+    <xsl:variable name="abstract_trim_left_newlines">
+      <xsl:call-template name="trim-left-characters">
+        <xsl:with-param name="text" select="$abstract_norm_newlines"/>
+        <xsl:with-param name="character" select="$char_lf"/>
+      </xsl:call-template>
+    </xsl:variable>
+
+    <!-- Trim LFs from right end of string -->
+    <xsl:variable name="abstract_trim_right_newlines">
+      <xsl:call-template name="trim-right-characters">
+        <xsl:with-param name="text" select="$abstract_trim_left_newlines"/>
+        <xsl:with-param name="character" select="$char_lf"/>
+      </xsl:call-template>
+    </xsl:variable>
+
+    <!-- Replace each LF char with string $s_newline_substitute -->
+    <dc:description>
+      <xsl:call-template name="string-replace-all">
+        <xsl:with-param name="text" select="$abstract_trim_right_newlines" />
+        <xsl:with-param name="replace" select="$char_lf" />
+        <xsl:with-param name="by" select="$s_newline_substitute" />
+      </xsl:call-template>
+    </dc:description>
   </xsl:template>
 
   <!-- dc:description - second -->

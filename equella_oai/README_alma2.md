@@ -87,3 +87,9 @@ also wish to archive them for a few weeks or months. A Linux shell
 script which performs both actions and which can be run via a
 cron-job can be found [here](linux_exchange_server/bin/thesis_import_prep.sh).
 
+**Note:** Despite the above *Publishing protocol* showing the option
+*Disable file compression*, at the time of writing it did not appear
+to permit file compression to be disabled. In addition, the Repository
+Import Profile did not import tar.gz compressed files. Hence the
+unzip cron-job was needed.
+

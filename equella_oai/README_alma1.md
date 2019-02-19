@@ -1,6 +1,13 @@
 # Alma configuration - Part 1
 
 
+## Contents
+
+- *[Alma configuration - Part 1](README_alma1.md)* - this document
+- *[Alma configuration - Part 2](README_alma2.md)*
+- *[Alma configuration - Part 3](README_alma3.md)*
+
+
 ## Create an Import Profile for a Digital profile-type
 - Equella prerequisite: Create an OAI-PMH data provider for Qualified Dublin Core, QDC (or Dublin Core, DC)
 - Alma prerequisite: [Create a top level collection and sub-collection](#create-a-top-level-collection-and-sub-collection)

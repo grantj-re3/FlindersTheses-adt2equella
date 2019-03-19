@@ -92,14 +92,27 @@ show_file_info() {
   shopt -s nullglob	# Do not execute for-loop body if no files match
   sum=0
   nfiles=0
+  ndelfiles=0
+  match="delete"
   for dest_fname in "$DEST_DIR/$DEST_BIB_BASENAME"*"$DEST_BIB_EXT"; do
-    nrecs=`xmllint --format "$dest_fname" |egrep -c "<record>"`
+    nfiles=`expr $nfiles + 1`
+    errormsg=`xmllint --format "$dest_fname" 2>&1`
+    if [ $? = 0 ]; then
+      nrecs=`xmllint --format "$dest_fname" |egrep -c "<record>"`
+    else
+      echo "  ERROR: $errormsg"
+      nrecs=0
+    fi
     echo "$dest_fname:$nrecs"
     sum=`expr $sum + $nrecs`
-    nfiles=`expr $nfiles + 1`
+
+    if `basename "$dest_fname" |egrep -iq "$match"`; then
+      ndelfiles=`expr $ndelfiles + 1`
+    fi
   done
   echo "Total records being processed:$sum"
 
+  [ $ndelfiles != 0 ] && echo "**WARNING**: $ndelfiles files have '$match' in their filename. Please investigate!"
   echo "== Show file details"
   [ $nfiles != 0 ] && ls -go --time-style="+%F %T" "$DEST_DIR/$DEST_BIB_BASENAME"*"$DEST_BIB_EXT"
 }

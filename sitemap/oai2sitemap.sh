@@ -66,6 +66,11 @@ oai_recs_per_page=10		# Expected OAI-PMH records per page (except for last page)
 datestamp=`date '+%F %T %z'`
 
 ##############################################################################
+# Optionally override any of the above variables.
+ENV_PATH="`echo \"$0\" |sed 's/\.sh$/_env.sh/'`"      # Path to THIS_env.sh
+[ -f $ENV_PATH ] && . $ENV_PATH
+
+##############################################################################
 # Change directory. Exit if unable to change directory.
 cd_exit_on_error() {
   dir="$1"

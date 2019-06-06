@@ -58,6 +58,10 @@ fname_dest_sitemap="/my/sitemap/path/sitemap.xml.gz"			# CUSTOMISE
 fname_dest_html_summary="/my/sitemap/path/thesis_summary.html"		# CUSTOMISE
 log="$HOME/opt/get_oai_pages/log/$app.log"				# CUSTOMISE
 
+# Backup parameters
+hm_backups=12
+dirpath_dest_backup="/my/sitemap/path/bak"
+
 # Space separated email list (for mailx)
 dest_email_list="me@example.com you@example.com"			# CUSTOMISE
 email_subject="Thesis - create Google Scholar browse interface: $app.log"
@@ -259,6 +263,23 @@ create_google_scholar_html_summary_records() {
 }
 
 ##############################################################################
+backup_file() {
+  fpath_target="$1"
+  dirpath_backup="$2"
+  num_backups="$3"
+
+  basename_backup=`basename "$fpath_target"`
+  fpath_backup="$dirpath_backup/$basename_backup"
+
+  # Take backups
+  for i_next in `seq $num_backups -1 1`; do	# i_next = num_backups ... 3 2 1
+    i=`expr $i_next - 1`			# i =  (num_backups-1) ... 2 1 0
+    [ -f "$fpath_backup.$i" ] && cp -fp "$fpath_backup.$i" "$fpath_backup.$i_next"
+  done
+  cp -fp "$fpath_target" "$fpath_backup.0"
+}
+
+##############################################################################
 show_stats() {
   echo "INFO: Expected number of OAI-PMH records per page: $oai_recs_per_page" >&2
   oai_pages=`ls -1 $fname_oai_pattern 2>/dev/null |wc -l`
@@ -293,7 +314,10 @@ $GET_OAI_PAGES_EXE "$url_oai" 2>&1
 
     echo "Creating HTML summary for Google Scholar: $fname_dest_html_summary"
     create_google_scholar_html_summary > $fname_dest_html_summary
+
     show_stats
+    backup_file "$fname_dest_sitemap"      "$dirpath_dest_backup" $hm_backups
+    backup_file "$fname_dest_html_summary" "$dirpath_dest_backup" $hm_backups
 
   else
     echo "ERROR: No OAI-PMH page-files found" >&2

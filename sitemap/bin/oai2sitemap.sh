@@ -1,7 +1,7 @@
 #!/bin/sh
 # oai2sitemap.sh
 #
-# Copyright (c) 2015-2018, Flinders University, South Australia. All rights reserved.
+# Copyright (c) 2015-2019, Flinders University, South Australia. All rights reserved.
 # Contributors: Library, Corporate Services, Flinders University.
 # See the accompanying LICENSE file (or http://opensource.org/licenses/BSD-3-Clause).
 #
@@ -20,6 +20,8 @@
 # - creates a sitemap file (as per http://www.sitemaps.org/protocol.html) 
 # - creates an HTML summary page for Google Scholar (consisting of item
 #   date, title and URL)
+# - creates backups of the above files
+# - creates a file which lists any URLs/keys deleted since the last harvest
 #
 # Suitable for running as a cron job. Eg.
 #   15 19 * * * $HOME/bin/oai2sitemap.sh >/dev/null
@@ -38,7 +40,9 @@
 PATH=/bin:/usr/bin:/usr/local/bin;	export PATH
 app=`basename $0 .sh`
 
-GET_OAI_PAGES_EXE="$HOME/opt/get_oai_pages/bin/get_oai_pages.rb"	# CUSTOMISE
+sitemap_job_dir="/my/sitemap/job/dir"					# CUSTOMISE
+sitemap_html_dir="/my/sitemap/html/dir"					# CUSTOMISE
+GET_OAI_PAGES_EXE="$sitemap_job_dir/get_oai_pages/bin/get_oai_pages.rb"	# CUSTOMISE
 
 # Initial URL of the OAI-PMH provider
 # CUSTOMISE
@@ -50,17 +54,26 @@ target_url_prefix="https://target_host/view/"				# CUSTOMISE
 
 # Strongly recommend using absolute paths as matching files will be deleted.
 # Pattern must NOT contain white space.
-temp_dir="/my/sitemap/temp/dir"						# CUSTOMISE
+temp_dir="$sitemap_job_dir/cache"
 fname_oai_pattern="$temp_dir/oai_page_[0-9][0-9][0-9][0-9].xml"
 
 # Destination filenames
-fname_dest_sitemap="/my/sitemap/path/sitemap.xml.gz"			# CUSTOMISE
-fname_dest_html_summary="/my/sitemap/path/thesis_summary.html"		# CUSTOMISE
-log="$HOME/opt/get_oai_pages/log/$app.log"				# CUSTOMISE
+fname_dest_sitemap="$sitemap_html_dir/sitemap.xml.gz"		# CUSTOMISE
+fname_dest_html_summary="$sitemap_html_dir/thesis_summary.html"	# CUSTOMISE
 
 # Backup parameters
 hm_backups=12
-dirpath_dest_backup="/my/sitemap/path/bak"
+dirpath_dest_backup="$sitemap_html_dir/bak"
+
+# File/dir names for intermediate results
+reclist_dir="$sitemap_job_dir/reclists"
+reclist_full_dir="$reclist_dir/full"
+fname_full_urls_prefix="$reclist_full_dir/recs_all_"
+
+reclist_del_dir="$reclist_dir/deletedInEquella"
+fname_del_urls_prefix="$reclist_del_dir/recs_del_"
+
+log="$sitemap_job_dir/log/$app.log"
 
 # Space separated email list (for mailx)
 dest_email_list="me@example.com you@example.com"			# CUSTOMISE
@@ -280,6 +293,55 @@ backup_file() {
 }
 
 ##############################################################################
+get_prev_timestamp() {
+  prev_timestamp=`ls -1rt "$fname_full_urls_prefix"* 2>/dev/null |
+    grep -P "/recs_all_\d{6}\.\d{6}$" |
+    tail -1 |
+    sed 's!^.*_!!'`
+}
+
+##############################################################################
+# Compare the URLs/keys in the previous harvest with those in the current
+# harvest. Save any URLs/keys which have been removed since the previous
+# harvest.
+find_deleted_records() {
+  [ ! -d "$reclist_full_dir" ] && mkdir -p "$reclist_full_dir"
+  [ ! -d "$reclist_del_dir" ]  && mkdir -p "$reclist_del_dir"
+  now=`date +%y%m%d.%H%M%S`
+  fname_urls_now="$fname_full_urls_prefix$now"
+  fname_urls_del="$fname_del_urls_prefix$now"
+
+  get_prev_timestamp		# Returns prev_timestamp
+  extract_target_urls_from_oai_files |sort > "$fname_urls_now"
+
+  if [ -z "$prev_timestamp" ]; then
+    echo "WARNING: No list of previous records. Cannot determine if any records were deleted."
+
+  else
+    echo "Comparing previous records ($prev_timestamp) with current ($now)"
+    fname_urls_prev="$fname_full_urls_prefix$prev_timestamp"
+    sum_now=`sum < "$fname_urls_now"`
+    sum_prev=`sum < "$fname_urls_prev"`
+    if [ "$sum_now" = "$sum_prev" ]; then
+      echo "Previous and current record lists are identical. Not keeping current list."
+      rm -f "$fname_urls_now"
+
+    else
+      comm -13 "$fname_urls_now"  "$fname_urls_prev" > "$fname_urls_del"
+      if [ -s "$fname_urls_del" ]; then
+        num_recs_del=`wc -l < "$fname_urls_del"`
+        echo "$num_recs_del record(s) were deleted from the harvest. See $fname_urls_del"
+
+      else
+        echo "No files were deleted from the harvest since last time."
+        rm -f "$fname_urls_del"
+      fi
+
+    fi
+  fi
+}
+
+##############################################################################
 show_stats() {
   echo "INFO: Expected number of OAI-PMH records per page: $oai_recs_per_page" >&2
   oai_pages=`ls -1 $fname_oai_pattern 2>/dev/null |wc -l`
@@ -300,9 +362,10 @@ delete_oai_files	# Ensure no unwanted files influence results
 cd_exit_on_error "$temp_dir"
 
 # Write each OAI-PMH page to a file. Set of files = $fname_oai_pattern
-# - To omit email, comment out mailx command. Eg. ...|tee $log # |mailx ...
+# - To omit email, comment out mailx command. Eg. ...|tee -a $log # |mailx ...
 # - To omit logging and email, comment out tee command.
-#   Eg. ... 2>&1 # |tee $log ...
+#   Eg. ... 2>&1 # |tee -a $log ...
+
 $GET_OAI_PAGES_EXE "$url_oai" 2>&1
 {
   echo "INFO: Start datestamp: $datestamp" >&2
@@ -316,13 +379,17 @@ $GET_OAI_PAGES_EXE "$url_oai" 2>&1
     create_google_scholar_html_summary > $fname_dest_html_summary
 
     show_stats
+    echo "Creating backups"
     backup_file "$fname_dest_sitemap"      "$dirpath_dest_backup" $hm_backups
     backup_file "$fname_dest_html_summary" "$dirpath_dest_backup" $hm_backups
+
+    echo "Searching for deleted records"
+    find_deleted_records
 
   else
     echo "ERROR: No OAI-PMH page-files found" >&2
   fi
-} 2>&1 |tee $log |mailx -s "$email_subject" $dest_email_list
+} 2>&1 |tee -a $log |mailx -s "$email_subject" $dest_email_list
 
 delete_oai_files	# Clean up temporary files
 exit 0

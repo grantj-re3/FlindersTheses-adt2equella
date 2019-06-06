@@ -3,5 +3,12 @@ PURPOSE
 - To create a sitemap file (as per http://www.sitemaps.org/protocol.html) based
   on target URLs in an OAI-PMH harvest.
 
+- To create an HTML summary page for Google Scholar (consisting of item
+  date, title and URL).
+
+- To create a backup of the above files.
+
+- To create a file which lists any URLs/keys deleted since the last harvest.
+
 - To be suitable to run as a cron job.
 
